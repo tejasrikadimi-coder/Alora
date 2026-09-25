@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cart | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body>
+
+<header class="site-header">
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+
+    <!-- MOBILE MENU -->
+
+    <button
+        type="button"
+        class="menu-toggle"
+        onclick="toggleMenu()"
+        aria-label="Open navigation menu">
+        ☰
+    </button>
+
+
+    <!-- MAIN NAVIGATION -->
+
+    <nav id="navMenu">
+        <a href="index.html">Home</a>
+        <a href="collections.html">Collections</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+
+    <!-- RIGHT-SIDE ACTIONS -->
+
+    <div class="header-actions">
+
+        <a
+            href="wishlist.html"
+            class="header-icon-link"
+            aria-label="Wishlist">
+
+            <span class="header-icon">♡</span>
+
+            <span
+                class="header-count"
+                id="wishlistCountBadge">
+            </span>
+
+        </a>
+
+
+        <a
+            href="cart.html"
+            class="header-icon-link"
+            aria-label="Cart">
+
+            <span class="header-icon cart-symbol">🛒</span>
+
+            <span
+                class="header-count"
+                id="cartCountBadge">
+            </span>
+
+        </a>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="account-menu">
+
+            <button
+                type="button"
+                class="account-button"
+                onclick="toggleAccountMenu(event)"
+                aria-label="Account">
+                👤
+            </button>
+
+
+            <div
+    class="account-dropdown"
+    id="accountDropdown">
+
+    <a href="profile.html">
+        👤 My Profile
+    </a>
+
+    <a href="my-orders.html">
+        📦 My Orders
+    </a>
+
+</div>
+
+        </div>
+
+    </div>
+
+</header>
+
+<!-- ================= BANNER ================= -->
+
+<section class="page-banner">
+
+    <p>ALORA SHOPPING BAG</p>
+
+    <h1>Your Cart</h1>
+
+    <span>
+        Review your selected jewellery before placing your order.
+    </span>
+
+</section>
+
+
+<!-- ================= CART ================= -->
+
+<main class="cart-section">
+
+
+    <!-- CART PRODUCTS -->
+
+    <div
+        id="cartItems"
+        class="cart-items">
+    </div>
+
+
+    <!-- EMPTY CART -->
+
+    <div
+        class="empty-wishlist empty-cart"
+        id="emptyCart">
+
+        <div class="empty-icon">🛒</div>
+
+        <h2>Your Cart is Empty</h2>
+
+        <p>
+            Add some beautiful jewellery to your cart.
+        </p>
+
+        <a
+            href="collections.html"
+            class="shop-btn">
+            Explore Collections
+        </a>
+
+    </div>
+
+
+    <!-- CART SUMMARY -->
+
+    <div
+        class="cart-summary"
+        id="cartSummary">
+
+        <h2>Order Summary</h2>
+
+        <div class="summary-line">
+
+            <span>Items</span>
+
+            <span id="cartItemCount">0</span>
+
+        </div>
+
+        <div class="summary-line total-line">
+
+            <span>Total</span>
+
+            <strong id="grandTotal">₹0</strong>
+
+        </div>
+
+        <button
+            type="button"
+            class="checkout-btn"
+            onclick="checkoutCart()">
+            Buy All / Place Order
+        </button>
+
+    </div>
+
+</main>
+
+
+<footer>
+    © 2026 Alora Handmade Jewelry
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

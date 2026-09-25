@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body>
+
+
+<header>
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+    <a href="index.html" class="header-back">
+        ← Back to Home
+    </a>
+
+</header>
+
+
+<main class="auth-page">
+
+    <div class="auth-card">
+
+
+        <!-- LOGIN -->
+
+        <section
+            class="auth-form-section"
+            id="loginSection">
+
+            <div class="auth-brand-badge">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Monogram" class="auth-logo-monogram">
+            </div>
+
+            <div class="auth-heading">
+
+                <p>WELCOME BACK</p>
+
+                <h1>Login</h1>
+
+                <span>
+                    Login to view your profile and orders.
+                </span>
+
+            </div>
+
+
+            <form id="loginForm">
+
+                <label for="loginEmail">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required>
+
+
+                <label for="loginPassword">
+                    Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required>
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        aria-label="Show password"
+                        onclick="togglePassword(
+                            'loginPassword',
+                            this
+                        )">
+                    </button>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="forgotPasswordButton"
+                    class="forgot-password-button">
+                    Forgot Password?
+                </button>
+
+
+                <p
+                    class="auth-message"
+                    id="loginMessage"
+                    role="status"
+                    aria-live="polite">
+                </p>
+
+
+                <button
+                    type="submit"
+                    class="auth-submit">
+                    Login
+                </button>
+
+            </form>
+
+
+            <p class="auth-switch">
+
+                Don't have an account?
+
+                <button
+                    type="button"
+                    onclick="showRegister()">
+                    Create Account
+                </button>
+
+            </p>
+
+        </section>
+
+
+        <!-- REGISTER -->
+
+        <section
+            class="auth-form-section"
+            id="registerSection"
+            hidden>
+
+            <div class="auth-brand-badge">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Monogram" class="auth-logo-monogram">
+            </div>
+
+            <div class="auth-heading">
+
+                <p>JOIN ALORA</p>
+
+                <h1>Create Account</h1>
+
+                <span>
+                    Register to manage your profile and orders.
+                </span>
+
+            </div>
+
+
+            <form id="registerForm">
+
+                <label for="registerName">
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    id="registerName"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    required>
+
+
+                <label for="registerEmail">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required>
+
+
+                <label for="registerPhone">
+                    Phone Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="registerPhone"
+                    placeholder="Enter 10-digit phone number"
+                    autocomplete="tel"
+                    inputmode="numeric"
+                    required>
+
+
+                <label for="registerPassword">
+                    Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        type="password"
+                        id="registerPassword"
+                        placeholder="Minimum 6 characters"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required>
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        aria-label="Show password"
+                        onclick="togglePassword(
+                            'registerPassword',
+                            this
+                        )">
+                    </button>
+
+                </div>
+
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    placeholder="Enter password again"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required>
+
+
+                <p
+                    class="auth-message"
+                    id="registerMessage">
+                </p>
+
+
+                <button
+                    type="submit"
+                    class="auth-submit">
+                    Create Account
+                </button>
+
+            </form>
+
+
+            <p class="auth-switch">
+
+                Already have an account?
+
+                <button
+                    type="button"
+                    onclick="showLogin()">
+                    Login
+                </button>
+
+            </p>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<footer>
+    © 2026 Alora Handmade Jewelry
+</footer>
+
+
+<script src="script.js"></script>
+
+<script
+    type="module"
+    src="auth.js">
+</script>
+
+</body>
+
+</html>

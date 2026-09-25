@@ -1,0 +1,14 @@
+{
+  "name": "alora-firestore-rules-tests",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "sync-rules": "node sync-rules.js",
+    "test": "npm run sync-rules && node rules.test.js",
+    "emulator": "firebase emulators:start --only firestore --project demo-alora-rules"
+  },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase": "^10.14.1"
+  }
+}

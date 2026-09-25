@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Product Details | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body class="product-page">
+
+<header class="site-header">
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+
+    <!-- MOBILE MENU -->
+
+    <button
+        type="button"
+        class="menu-toggle"
+        onclick="toggleMenu()"
+        aria-label="Open navigation menu">
+        ☰
+    </button>
+
+
+    <!-- MAIN NAVIGATION -->
+
+    <nav id="navMenu">
+        <a href="index.html">Home</a>
+        <a href="collections.html">Collections</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+
+    <!-- RIGHT-SIDE ACTIONS -->
+
+    <div class="header-actions">
+
+        <a
+            href="wishlist.html"
+            class="header-icon-link"
+            aria-label="Wishlist">
+
+            <span class="header-icon">♡</span>
+
+            <span
+                class="header-count"
+                id="wishlistCountBadge">
+            </span>
+
+        </a>
+
+
+        <a
+            href="cart.html"
+            class="header-icon-link"
+            aria-label="Cart">
+
+            <span class="header-icon cart-symbol">🛒</span>
+
+            <span
+                class="header-count"
+                id="cartCountBadge">
+            </span>
+
+        </a>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="account-menu">
+
+            <button
+                type="button"
+                class="account-button"
+                onclick="toggleAccountMenu(event)"
+                aria-label="Account">
+                👤
+            </button>
+
+
+           <div
+    class="account-dropdown"
+    id="accountDropdown">
+
+    <a href="profile.html">
+        👤 My Profile
+    </a>
+
+    <a href="my-orders.html">
+        📦 My Orders
+    </a>
+
+</div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="product-container">
+
+    <a href="collections.html" class="back-btn">
+        ← Back to Collections
+    </a>
+
+
+    <div class="product-detail">
+
+
+        <!-- PRODUCT IMAGE -->
+
+        <div class="product-detail-image">
+
+            <img
+                id="productImage"
+                src=""
+                alt="Product Image">
+
+        </div>
+
+
+        <!-- PRODUCT INFORMATION -->
+
+        <div class="product-details">
+
+            <p class="product-label">
+                ALORA HANDMADE
+            </p>
+
+            <h1 id="productName">
+                Jewellery
+            </h1>
+
+            <div class="price" id="productPrice">
+                ₹0
+            </div>
+            <p
+    class="product-stock-status"
+    id="productStockStatus">
+</p>
+
+            <p class="desc" id="productDescription">
+                Handcrafted premium jewellery made with love and elegance.
+                Perfect for weddings, parties, festivals and gifting.
+            </p>
+
+
+            <!-- QUANTITY -->
+
+            <div class="qty-box">
+
+                <span>Quantity</span>
+
+                <div class="qty">
+
+                    <button
+                        type="button"
+                        onclick="minus()"
+                        aria-label="Decrease quantity">
+                        −
+                    </button>
+
+                    <span id="count">1</span>
+
+                    <button
+                        type="button"
+                        onclick="plus()"
+                        aria-label="Increase quantity">
+                        +
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- PRODUCT BUTTONS -->
+
+            <div class="product-actions">
+
+                <button
+    type="button"
+    class="buy"
+    id="productBuyButton"
+    onclick="buyNow()">
+    Buy Now
+</button>
+                <button
+    type="button"
+    class="add-cart"
+    id="productCartButton"
+    onclick="addCurrentProductToCart()">
+    🛒 Add to Cart
+</button>
+
+                <button
+                    type="button"
+                    class="wish"
+                    id="productWishlistBtn"
+                    onclick="toggleProductWishlist()">
+                    ♡ Wishlist
+                </button>
+
+                <button
+                    type="button"
+                    class="share-product"
+                    id="productShareButton"
+                    onclick="shareCurrentProduct()">
+                    Share Product
+                </button>
+
+            </div>
+
+            <p
+                class="product-share-status"
+                id="productShareStatus"
+                role="status"
+                aria-live="polite">
+            </p>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<footer>
+    © 2026 Alora Handmade Jewelry
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

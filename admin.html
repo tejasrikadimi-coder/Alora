@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Dashboard | Alora</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+
+</head>
+
+
+<body class="admin-page">
+
+
+<!-- =====================================================
+     ADMIN HEADER
+===================================================== -->
+
+<header class="admin-header">
+
+    <a
+        href="index.html"
+        class="logo"
+        aria-label="Alora Admin"
+    >
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+
+    <div class="admin-header-actions">
+
+        <a href="index.html?view=storefront">
+            View Website
+        </a>
+
+        <button
+            type="button"
+            id="adminLogoutButton"
+        >
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     ADMIN MAIN
+===================================================== -->
+
+<main class="admin-container">
+
+
+    <!-- =================================================
+         PAGE HEADING
+    ================================================== -->
+
+    <section class="admin-heading">
+
+        <div>
+
+            <p>ALORA MANAGEMENT</p>
+
+            <h1>Admin Dashboard</h1>
+
+            <span id="adminWelcome">
+                Hi Madhuri
+            </span>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="admin-refresh-button"
+            id="refreshOrdersButton"
+        >
+            ↻ Refresh Orders
+        </button>
+
+    </section>
+
+
+    <!-- =================================================
+         ACCESS MESSAGE
+    ================================================== -->
+
+    <div
+        class="admin-access-message"
+        id="adminAccessMessage"
+    >
+        Verifying administrator access...
+    </div>
+
+
+    <!-- =================================================
+         DASHBOARD CONTENT
+    ================================================== -->
+
+    <div
+        id="adminDashboardContent"
+        hidden
+    >
+
+
+        <!-- =============================================
+             ORDER STATISTICS
+        ============================================== -->
+
+<section class="admin-stats">
+
+    <div
+        class="admin-stat-card"
+        id="adminTotalOrdersCard"
+        role="button"
+        tabindex="0">
+
+        <span>Total Orders</span>
+
+        <strong id="adminTotalOrders">
+            0
+        </strong>
+
+    </div>
+
+
+    <div
+        class="admin-stat-card"
+        id="adminNewOrdersCard"
+        role="button"
+        tabindex="0">
+
+        <span>New Orders</span>
+
+        <strong id="adminNewOrders">
+            0
+        </strong>
+
+    </div>
+
+
+    <div
+        class="admin-stat-card"
+        id="adminShippedOrdersCard"
+        role="button"
+        tabindex="0">
+
+        <span>Shipped</span>
+
+        <strong id="adminShippedOrders">
+            0
+        </strong>
+
+    </div>
+
+
+    <div
+        class="admin-stat-card"
+        id="adminRequestsCard"
+        role="button"
+        tabindex="0">
+        
+        <span>Requests</span>
+        <strong id="adminRequestCount">
+            0
+        </strong>
+
+    </div>
+
+</section>
+
+
+        <!-- =============================================
+             ORDER SEARCH AND FILTER
+        ============================================== -->
+
+        <section class="admin-filters">
+
+            <input
+                type="search"
+                id="adminOrderSearch"
+                placeholder="Search order, customer or phone...">
+            <select id="adminStatusFilter">
+                <option value="all">
+                    All Statuses
+                </option>
+                <option value="Order Received">
+                    Order Received
+                </option>
+                <option value="Confirmed">
+                    Confirmed
+                </option>
+                <option value="Processing">
+                    Processing
+                </option>
+                <option value="Shipped">
+                    Shipped
+                </option>
+
+                <option value="Out for Delivery">
+                    Out for Delivery
+                </option>
+
+                <option value="Delivered">
+                    Delivered
+                </option>
+
+                <option value="Cancelled">
+                    Cancelled
+                </option>
+
+            </select>
+
+        </section>
+
+
+        <!-- =================================================
+             ADD NEW PRODUCT
+        ================================================== -->
+
+        <section class="admin-product-management">
+
+            <div class="admin-section-heading">
+
+                <p>PRODUCT MANAGEMENT</p>
+
+                <h2>Add New Product</h2>
+
+                <span>
+                    Add a new product to the Alora catalogue.
+                </span>
+
+            </div>
+
+
+            <form
+                class="admin-product-form"
+                id="adminProductForm"
+            >
+
+                <div class="admin-product-form-grid">
+
+
+                    <!-- PRODUCT NAME -->
+
+                    <div class="admin-form-group">
+
+                        <label for="adminProductName">
+                            Product Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="adminProductName"
+                            placeholder="Example: Pearl Necklace"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- PRODUCT PRICE -->
+
+                    <div class="admin-form-group">
+
+                        <label for="adminProductPrice">
+                            Price
+                        </label>
+
+                        <input
+                            type="number"
+                            id="adminProductPrice"
+                            placeholder="Example: 999"
+                            min="1"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- PRODUCT STOCK -->
+
+                    <div class="admin-form-group">
+
+                        <label for="adminProductStock">
+                            Stock Quantity
+                        </label>
+
+                        <input
+                            type="number"
+                            id="adminProductStock"
+                            placeholder="Example: 10"
+                            min="0"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- PRODUCT IMAGE: GALLERY UPLOAD OR REMOTE URL -->
+
+                    <div class="admin-form-group">
+
+                        <label
+                            for="adminProductImageFile"
+                            class="admin-file-upload-label"
+                        >
+                            Upload Image from Device / Gallery:
+                        </label>
+
+                        <input
+                            type="file"
+                            id="adminProductImageFile"
+                            accept="image/*"
+                            class="admin-file-input"
+                        >
+
+                        <label for="adminProductImage" style="display: block; margin-top: 8px; font-size: 0.85rem; color: #555;">
+                            Or enter Image URL (https://...):
+                        </label>
+
+                        <input
+                            type="url"
+                            id="adminProductImage"
+                            placeholder="https://res.cloudinary.com/... or https://..."
+                        >
+
+                    </div>
+
+
+
+                    <!-- PRODUCT DESCRIPTION -->
+
+                    <div class="admin-form-group full">
+
+                        <label for="adminProductDescription">
+                            Product Description
+                        </label>
+
+                        <textarea
+                            id="adminProductDescription"
+                            placeholder="Enter product description"
+                            required
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <!-- IMAGE PREVIEW -->
+
+                <div
+                    class="admin-product-preview"
+                    id="adminProductPreview"
+                    hidden
+                >
+
+                    <img
+                        id="adminProductPreviewImage"
+                        src=""
+                        alt="Product preview"
+                    >
+
+                </div>
+
+
+                <!-- PRODUCT FORM MESSAGE -->
+
+                <p
+                    class="admin-product-message"
+                    id="adminProductMessage"
+                ></p>
+
+
+                <button
+                    type="submit"
+                    class="admin-add-product-button"
+                    id="adminAddProductButton"
+                >
+                    + Add Product
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- =================================================
+             MANAGE PRODUCTS
+        ================================================== -->
+
+        <section class="admin-manage-products">
+
+            <div class="admin-section-heading">
+
+                <p>PRODUCT CATALOGUE</p>
+
+                <h2>Manage Products</h2>
+
+                <span>
+                    Edit prices, stock, product details,
+                    visibility or remove products.
+                </span>
+
+            </div>
+
+
+            <!-- PRODUCT SEARCH AND FILTER -->
+
+            <div class="admin-product-tools">
+
+                <input
+                    type="search"
+                    id="adminProductSearch"
+                    placeholder="Search products..."
+                >
+
+
+                <select id="adminProductFilter">
+
+                    <option value="all">
+                        All Products
+                    </option>
+
+                    <option value="active">
+                        Active Products
+                    </option>
+
+                    <option value="hidden">
+                        Hidden Products
+                    </option>
+                    <option value="low-stock">
+    Low Stock / Out of Stock
+</option>
+
+                </select>
+
+
+                <button
+                    type="button"
+                    id="adminReloadProducts"
+                    class="admin-reload-products"
+                >
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+
+            <!-- PRODUCTS LIST -->
+
+            <div
+                class="admin-products-list"
+                id="adminProductsList"
+            >
+
+                <div class="admin-loading">
+                    Loading products...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CUSTOMER ORDERS
+        ================================================== -->
+
+        <section class="admin-orders-section">
+
+            <div class="admin-section-title">
+
+                <p>CUSTOMER ORDERS</p>
+
+                <h2>Manage Orders</h2>
+
+            </div>
+
+            <div
+                class="admin-direct-order-message"
+                id="adminDirectOrderMessage"
+                role="status"
+                aria-live="polite"
+                style="display: none;"
+            ></div>
+
+            <div
+                class="admin-orders-list"
+                id="adminOrdersList"
+            >
+
+                <div class="admin-orders-loading">
+                    Loading customer orders...
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </div>
+
+</main>
+
+
+<!-- =====================================================
+     EDIT PRODUCT MODAL
+===================================================== -->
+
+<div
+    class="admin-product-modal"
+    id="adminProductModal"
+    hidden
+>
+
+    <div
+        class="admin-product-modal-overlay"
+        id="adminProductModalOverlay"
+    ></div>
+
+
+    <div class="admin-product-modal-card">
+
+        <button
+            type="button"
+            class="admin-product-modal-close"
+            id="adminProductModalClose"
+            aria-label="Close product editor"
+        >
+            ×
+        </button>
+
+
+        <div class="admin-section-heading">
+
+            <p>PRODUCT EDITOR</p>
+
+            <h2>Edit Product</h2>
+
+        </div>
+
+
+        <form id="adminEditProductForm">
+
+
+            <input
+                type="hidden"
+                id="adminEditProductId"
+            >
+
+
+            <!-- EDIT PRODUCT NAME -->
+
+            <div class="admin-form-group">
+
+                <label for="adminEditProductName">
+                    Product Name
+                </label>
+
+                <input
+                    type="text"
+                    id="adminEditProductName"
+                    required
+                >
+
+            </div>
+
+
+            <!-- EDIT PRODUCT PRICE -->
+
+            <div class="admin-form-group">
+
+                <label for="adminEditProductPrice">
+                    Price
+                </label>
+
+                <input
+                    type="number"
+                    id="adminEditProductPrice"
+                    min="1"
+                    required
+                >
+
+            </div>
+
+
+            <!-- EDIT PRODUCT STOCK -->
+
+            <div class="admin-form-group">
+
+                <label for="adminEditProductStock">
+                    Stock Quantity
+                </label>
+
+                <input
+                    type="number"
+                    id="adminEditProductStock"
+                    min="0"
+                    required
+                >
+
+            </div>
+
+
+            <!-- EDIT PRODUCT IMAGE: GALLERY UPLOAD OR REMOTE URL -->
+
+            <div class="admin-form-group">
+
+                <label
+                    for="adminEditProductImageFile"
+                    class="admin-file-upload-label"
+                >
+                    Upload New Image from Device / Gallery:
+                </label>
+
+                <input
+                    type="file"
+                    id="adminEditProductImageFile"
+                    accept="image/*"
+                    class="admin-file-input"
+                >
+
+                <label for="adminEditProductImage" style="display: block; margin-top: 8px; font-size: 0.85rem; color: #555;">
+                    Or enter Image URL (https://...):
+                </label>
+
+                <input
+                    type="url"
+                    id="adminEditProductImage"
+                    placeholder="https://res.cloudinary.com/... or https://..."
+                >
+
+            </div>
+
+
+            <!-- EDIT PRODUCT PREVIEW -->
+
+            <div
+                class="admin-product-preview"
+                id="adminEditProductPreview"
+                hidden
+            >
+
+                <img
+                    id="adminEditProductPreviewImage"
+                    src=""
+                    alt="Edit product preview"
+                >
+
+            </div>
+
+
+            <!-- EDIT PRODUCT DESCRIPTION -->
+
+            <div class="admin-form-group">
+
+                <label for="adminEditProductDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="adminEditProductDescription"
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <!-- EDIT MESSAGE -->
+
+            <p
+                class="admin-product-message"
+                id="adminEditProductMessage"
+            ></p>
+
+
+            <button
+                type="submit"
+                class="admin-save-product-button"
+                id="adminSaveProductButton"
+            >
+                Save Changes
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+    © 2026 Alora Handmade Jewelry — Admin
+</footer>
+
+
+<!-- =====================================================
+     CLOUDINARY CONFIGURATION
+     Public-safe unsigned upload configuration.
+     Never expose Cloudinary API secrets in client code.
+===================================================== -->
+<script>
+    window.ALORA_CLOUDINARY_CONFIG = {
+        cloudName: "vgjfpkoh",
+        uploadPreset: "alora_products"
+    };
+</script>
+
+
+<script
+    type="module"
+    src="admin.js"
+></script>
+
+</body>
+
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Checkout | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body>
+
+
+<header>
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+    <a href="cart.html" class="header-back">
+        ← Back to Cart
+    </a>
+
+</header>
+
+
+<main class="order-page">
+
+    <div class="order-card">
+
+
+        <!-- HEADING -->
+
+        <div class="order-heading">
+
+            <p>ALORA HANDMADE JEWELRY</p>
+
+            <h1>Checkout</h1>
+
+            <span>
+                Review your order and select a payment method.
+            </span>
+
+        </div>
+
+
+        <!-- PROFILE LOADING -->
+
+        <div
+            class="checkout-loading"
+            id="checkoutLoading">
+
+            Loading your delivery details...
+
+        </div>
+
+
+        <!-- DELIVERY DETAILS -->
+
+        <section
+            class="checkout-profile"
+            id="checkoutProfile"
+            hidden>
+
+            <div class="checkout-section-heading">
+
+                <div>
+
+                    <p>DELIVERY DETAILS</p>
+
+                    <h2>Delivering To</h2>
+
+                </div>
+
+                <a href="profile.html" id="changeProfileLink">
+                    Change
+                </a>
+
+            </div>
+
+
+            <div class="checkout-profile-details">
+
+                <strong id="checkoutName"></strong>
+
+                <span id="checkoutPhone"></span>
+
+                <span id="checkoutEmail"></span>
+
+                <p id="checkoutAddress"></p>
+
+            </div>
+
+        </section>
+
+
+        <!-- MISSING ADDRESS -->
+
+        <section
+            class="missing-address"
+            id="missingAddress"
+            hidden>
+
+            <div class="missing-address-icon">📍</div>
+
+            <h2>Add Your Delivery Address</h2>
+
+            <p>
+                Please complete your profile before placing your order.
+            </p>
+
+            <a
+                href="profile.html"
+                id="addAddressLink"
+                class="shop-btn">
+                Add Address
+            </a>
+
+        </section>
+
+
+        <!-- HIDDEN CUSTOMER VALUES -->
+
+        <input
+            type="hidden"
+            id="customerName">
+
+        <input
+            type="hidden"
+            id="phone">
+
+        <input
+            type="hidden"
+            id="email">
+
+        <input
+            type="hidden"
+            id="address">
+
+
+        <!-- ORDER DETAILS -->
+
+        <section
+            class="checkout-order-details"
+            id="checkoutOrderDetails">
+
+            <div class="checkout-section-heading">
+
+                <div>
+
+                    <p>ORDER SUMMARY</p>
+
+                    <h2>Your Order</h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="checkout-product-row">
+
+                <div class="checkout-product-field">
+
+                    <label for="productName">
+                        Product
+                    </label>
+
+                    <input
+                        type="text"
+                        id="productName"
+                        readonly>
+
+                </div>
+
+
+                <div class="checkout-product-field">
+
+                    <label for="productPrice">
+                        Price
+                    </label>
+
+                    <input
+                        type="text"
+                        id="productPrice"
+                        readonly>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUANTITY -->
+
+            <div
+                class="checkout-option-row"
+                id="orderQuantitySection">
+
+                <div>
+
+                    <strong>Quantity</strong>
+
+                    <span>
+                        Select the required quantity
+                    </span>
+
+                </div>
+
+
+                <div class="quantity">
+
+                    <button
+                        type="button"
+                        onclick="minus()"
+                        aria-label="Decrease quantity">
+                        −
+                    </button>
+
+                    <span id="qty">1</span>
+
+                    <button
+                        type="button"
+                        onclick="plus()"
+                        aria-label="Increase quantity">
+                        +
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL -->
+
+            <div class="checkout-total-row">
+
+                <label for="totalPrice">
+                    Total
+                </label>
+
+                <input
+                    type="text"
+                    id="totalPrice"
+                    readonly>
+
+            </div>
+
+
+            <!-- PAYMENT -->
+
+            <div class="checkout-payment">
+
+                <label for="payment">
+                    Payment Method
+                </label>
+
+                <select id="payment">
+
+                    <option value="Cash on Delivery">
+                        Cash on Delivery
+                    </option>
+
+                    <option value="Online Payment (UPI)">
+                        Online Payment (UPI)
+                    </option>
+
+                </select>
+
+            </div>
+
+            <section
+                class="checkout-upi"
+                id="upiPaymentSection"
+                hidden>
+
+                <h3>Online Payment (UPI)</h3>
+
+                <p id="upiPaymentUnavailable" hidden>
+                    Online payment is temporarily unavailable.
+                </p>
+
+                <div id="upiPaymentDetails">
+                    <p>
+                        Pay exactly
+                        <strong id="upiPaymentAmount">₹0.00</strong>
+                    </p>
+
+                    <canvas
+                        id="upiQrCode"
+                        width="220"
+                        height="220"
+                        aria-label="UPI payment QR code">
+                    </canvas>
+
+                    <label for="utr">
+                        UPI Transaction ID / UTR
+                    </label>
+
+                    <input
+                        type="text"
+                        id="utr"
+                        maxlength="100"
+                        autocomplete="off"
+                        placeholder="Enter your UTR after payment">
+
+                    <small>
+                        Entering a UTR does not confirm payment. Your payment will be verified manually.
+                    </small>
+                </div>
+
+            </section>
+
+
+            <!-- MESSAGE -->
+
+            <p
+                class="checkout-message"
+                id="checkoutMessage">
+            </p>
+
+
+            <!-- PLACE ORDER -->
+
+            <button
+                type="button"
+                class="place-order"
+                id="placeOrderButton"
+                onclick="placeOrder()"
+                disabled>
+
+                Loading Profile...
+
+            </button>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<footer>
+    © 2026 Alora Handmade Jewelry
+</footer>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js">
+</script>
+
+<script>
+    window.ALORA_EMAIL_CONFIG = {
+        serviceId: "service_alora_orders",
+        adminTemplateId: "template_akp8jpm",
+        customerTemplateId: "template_5d30dsi",
+        publicKey: "00wPV9AVw4H_OsF63"
+    };
+</script>
+<script src="order-email.js"></script>
+<script src="script.js"></script>
+
+
+<script
+    type="module"
+    src="checkout-profile.js">
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wishlist | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body>
+<header class="site-header">
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+
+    <!-- MOBILE MENU -->
+
+    <button
+        type="button"
+        class="menu-toggle"
+        onclick="toggleMenu()"
+        aria-label="Open navigation menu">
+        ☰
+    </button>
+
+
+    <!-- MAIN NAVIGATION -->
+
+    <nav id="navMenu">
+        <a href="index.html">Home</a>
+        <a href="collections.html">Collections</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+
+    <!-- RIGHT-SIDE ACTIONS -->
+
+    <div class="header-actions">
+
+        <a
+            href="wishlist.html"
+            class="header-icon-link"
+            aria-label="Wishlist">
+
+            <span class="header-icon">♡</span>
+
+            <span
+                class="header-count"
+                id="wishlistCountBadge">
+            </span>
+
+        </a>
+
+
+        <a
+            href="cart.html"
+            class="header-icon-link"
+            aria-label="Cart">
+
+            <span class="header-icon cart-symbol">🛒</span>
+
+            <span
+                class="header-count"
+                id="cartCountBadge">
+            </span>
+
+        </a>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="account-menu">
+
+            <button
+                type="button"
+                class="account-button"
+                onclick="toggleAccountMenu(event)"
+                aria-label="Account">
+                👤
+            </button>
+
+
+            <div
+    class="account-dropdown"
+    id="accountDropdown">
+
+    <a href="profile.html">
+        👤 My Profile
+    </a>
+
+    <a href="my-orders.html">
+        📦 My Orders
+    </a>
+
+</div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ================= BANNER ================= -->
+
+<section class="page-banner">
+
+    <p>YOUR SAVED JEWELRY</p>
+
+    <h1>My Wishlist</h1>
+
+    <span>
+        Your favourite Alora jewellery, saved for later.
+    </span>
+
+</section>
+
+
+<!-- ================= WISHLIST ================= -->
+
+<main class="wishlist-section">
+
+    <div
+        class="wishlist-grid"
+        id="wishlistGrid">
+    </div>
+
+
+    <!-- EMPTY WISHLIST -->
+
+    <div
+        class="empty-wishlist"
+        id="emptyWishlist">
+
+        <div class="empty-icon">♡</div>
+
+        <h2>Your Wishlist is Empty</h2>
+
+        <p>
+            Save your favourite jewellery here and come back anytime.
+        </p>
+
+        <a
+            href="collections.html"
+            class="shop-btn">
+            Explore Collections
+        </a>
+
+    </div>
+
+</main>
+
+
+<footer>
+    © 2026 Alora Handmade Jewelry
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

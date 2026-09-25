@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body>
+
+
+<header class="site-header">
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+
+    <button
+        type="button"
+        class="menu-toggle"
+        onclick="toggleMenu()"
+        aria-label="Open navigation menu">
+        ☰
+    </button>
+
+
+    <nav id="navMenu">
+        <a href="index.html">Home</a>
+        <a href="collections.html">Collections</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+
+    <div class="header-actions">
+
+        <a
+            href="wishlist.html"
+            class="header-icon-link"
+            aria-label="Wishlist">
+
+            <span class="header-icon">♡</span>
+
+            <span
+                class="header-count"
+                id="wishlistCountBadge">
+            </span>
+
+        </a>
+
+
+        <a
+            href="cart.html"
+            class="header-icon-link"
+            aria-label="Cart">
+
+            <span class="header-icon cart-symbol">🛒</span>
+
+            <span
+                class="header-count"
+                id="cartCountBadge">
+            </span>
+
+        </a>
+
+
+        <div class="account-menu">
+
+            <button
+                type="button"
+                class="account-button"
+                onclick="toggleAccountMenu(event)"
+                aria-label="Account">
+                👤
+            </button>
+
+
+            <div
+                class="account-dropdown"
+                id="accountDropdown">
+
+                <a href="profile.html">
+                    👤 My Profile
+                </a>
+
+                <a href="my-orders.html">
+                    📦 My Orders
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<section class="page-banner">
+
+    <p>YOUR ALORA ACCOUNT</p>
+
+    <h1>My Profile</h1>
+
+    <span>
+        Manage your personal and delivery details.
+    </span>
+
+</section>
+
+
+<main class="profile-section">
+
+    <div class="profile-card">
+
+
+        <!-- PROFILE TOP -->
+
+        <div class="profile-top">
+
+            <div
+                class="profile-avatar"
+                id="profileAvatar">
+                A
+            </div>
+
+            <div>
+
+                <h2 id="profileDisplayName">
+                    Loading...
+                </h2>
+
+                <p id="profileDisplayEmail"></p>
+
+            </div>
+
+        </div>
+
+
+        <!-- PROFILE FORM -->
+
+        <form id="profileForm">
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+
+                    <label for="profileName">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profileName"
+                        autocomplete="name"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="profilePhone">
+                        Phone Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="profilePhone"
+                        autocomplete="tel"
+                        inputmode="numeric"
+                        required>
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label for="profileEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="profileEmail"
+                        readonly>
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label for="profileAddress">
+                        Delivery Address
+                    </label>
+
+                    <textarea
+                        id="profileAddress"
+                        autocomplete="street-address"
+                        placeholder="Enter your delivery address">
+                    </textarea>
+
+                </div>
+
+            </div>
+
+
+            <p
+                class="profile-message"
+                id="profileMessage">
+            </p>
+
+
+            <button
+                type="submit"
+                class="profile-save">
+                Save Changes
+            </button>
+
+        </form>
+
+
+        <!-- PROFILE LINKS -->
+
+        <div class="profile-links">
+
+            <a href="my-orders.html">
+                📦 View My Orders
+            </a>
+
+            <button
+                type="button"
+                id="logoutButton"
+                class="logout-button">
+                Logout
+            </button>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<footer>
+    © 2026 Alora Handmade Jewelry
+</footer>
+
+
+<script src="script.js"></script>
+
+<script
+    type="module"
+    src="profile.js">
+</script>
+
+</body>
+
+</html>
