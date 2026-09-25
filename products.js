@@ -17,6 +17,257 @@ import {
 const productsContainer =
     document.getElementById("products");
 
+/* =====================================================
+   CATEGORIZATION & BADGES HELPERS
+===================================================== */
+
+export function determineProductCategory(product) {
+    if (!product) return "Custom Jewellery";
+    if (product.category && typeof product.category === "string" && product.category.trim()) {
+        const cat = product.category.trim();
+        const validCats = [
+            "Earrings", "Necklaces", "Bangles", "Hair Pins",
+            "Kids Jewellery", "Rings", "Custom Jewellery"
+        ];
+        const match = validCats.find(c => c.toLowerCase() === cat.toLowerCase());
+        if (match) return match;
+    }
+    const text = ((product.name || "") + " " + (product.description || "")).toLowerCase();
+    if (text.includes("earring") || text.includes("jhumka") || text.includes("stud") || text.includes("drop")) {
+        return "Earrings";
+    }
+    if (text.includes("choker") || text.includes("neck") || text.includes("pendant") || text.includes("haar") || text.includes("chain")) {
+        return "Necklaces";
+    }
+    if (text.includes("bangle") || text.includes("bracelet") || text.includes("kada")) {
+        return "Bangles";
+    }
+    if (text.includes("ring")) {
+        return "Rings";
+    }
+    if (text.includes("hair") || text.includes("pin") || text.includes("clip")) {
+        return "Hair Pins";
+    }
+    if (text.includes("kid") || text.includes("child") || text.includes("baby")) {
+        return "Kids Jewellery";
+    }
+    return "Custom Jewellery";
+}
+window.determineProductCategory = determineProductCategory;
+
+export function determineProductBadge(product) {
+    if (!product) return null;
+    if (Number(product.stock) <= 0) {
+        return { text: "Out of Stock", className: "badge-out-of-stock" };
+    }
+    if (product.badge) {
+        const b = String(product.badge).toLowerCase();
+        if (b.includes("new")) return { text: "NEW", className: "badge-new" };
+        if (b.includes("best") || b.includes("bestseller")) return { text: "BEST SELLER", className: "badge-bestseller" };
+        if (b.includes("custom")) return { text: "CUSTOMIZABLE", className: "badge-custom" };
+    }
+    if (product.isBestSeller || product.bestSeller) {
+        return { text: "BEST SELLER", className: "badge-bestseller" };
+    }
+    if (product.isNew) {
+        return { text: "NEW", className: "badge-new" };
+    }
+    if (product.customizable || product.category === "Custom Jewellery") {
+        return { text: "CUSTOMIZABLE", className: "badge-custom" };
+    }
+    if (product.createdAt) {
+        try {
+            const created = new Date(product.createdAt).getTime();
+            const now = Date.now();
+            if (now - created < 30 * 24 * 60 * 60 * 1000) {
+                return { text: "NEW", className: "badge-new" };
+            }
+        } catch (_) {}
+    }
+    return null;
+}
+window.determineProductBadge = determineProductBadge;
+
+let allLoadedProducts = [];
+let currentCategory = "All";
+let currentSort = "featured";
+let inStockOnly = false;
+let currentSearchQuery = "";
+let currentMinPrice = null;
+let currentMaxPrice = null;
+let controlsInitialized = false;
+
+function applyFiltersAndRender() {
+    let result = [...allLoadedProducts];
+
+    // Filter by category
+    if (currentCategory && currentCategory !== "All") {
+        result = result.filter(p => p.category.toLowerCase() === currentCategory.toLowerCase());
+    }
+
+    // Filter by in-stock only
+    if (inStockOnly) {
+        result = result.filter(p => p.stock > 0);
+    }
+
+    // Filter by search query
+    if (currentSearchQuery) {
+        const q = currentSearchQuery.toLowerCase();
+        result = result.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            p.description.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q)
+        );
+    }
+
+    // Filter by manual price range (min, max, or both)
+    if (currentMinPrice !== null && !isNaN(currentMinPrice)) {
+        result = result.filter(p => Number(p.price) >= currentMinPrice);
+    }
+    if (currentMaxPrice !== null && !isNaN(currentMaxPrice)) {
+        result = result.filter(p => Number(p.price) <= currentMaxPrice);
+    }
+
+    // Sort
+    if (currentSort === "price-low") {
+        result.sort((a, b) => a.price - b.price);
+    } else if (currentSort === "price-high") {
+        result.sort((a, b) => b.price - a.price);
+    } else if (currentSort === "name-asc") {
+        result.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    renderProducts(result);
+}
+
+function setupCollectionsControls() {
+    if (controlsInitialized) return;
+    controlsInitialized = true;
+
+    // 1. URL params check
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get("category");
+        if (categoryParam) {
+            currentCategory = categoryParam;
+        }
+        const searchParam = urlParams.get("search");
+        if (searchParam) {
+            currentSearchQuery = searchParam;
+        }
+    } catch (_) {}
+
+    // 2. Category pills
+    const pillsContainer = document.getElementById("categoryPills");
+    if (pillsContainer) {
+        const pills = pillsContainer.querySelectorAll(".category-pill");
+        pills.forEach(pill => {
+            if (pill.dataset.category.toLowerCase() === currentCategory.toLowerCase()) {
+                pills.forEach(p => p.classList.remove("active"));
+                pill.classList.add("active");
+            }
+            pill.addEventListener("click", () => {
+                pills.forEach(p => p.classList.remove("active"));
+                pill.classList.add("active");
+                currentCategory = pill.dataset.category;
+                applyFiltersAndRender();
+            });
+        });
+    }
+
+    // 3. Sort Select
+    const sortSelect = document.getElementById("sortSelect");
+    if (sortSelect) {
+        sortSelect.addEventListener("change", () => {
+            currentSort = sortSelect.value;
+            applyFiltersAndRender();
+        });
+    }
+
+    // 4. In Stock Filter
+    const inStockCheckbox = document.getElementById("inStockFilter");
+    if (inStockCheckbox) {
+        inStockCheckbox.addEventListener("change", () => {
+            inStockOnly = inStockCheckbox.checked;
+            applyFiltersAndRender();
+        });
+    }
+
+    // 5. Search Input
+    const searchInput = document.getElementById("search");
+    if (searchInput) {
+        if (currentSearchQuery) {
+            searchInput.value = currentSearchQuery;
+        }
+        searchInput.addEventListener("input", () => {
+            currentSearchQuery = searchInput.value.trim();
+            applyFiltersAndRender();
+        });
+    }
+
+    // 6. Manual Price Range Filter
+    const minPriceInput = document.getElementById("minPriceInput");
+    const maxPriceInput = document.getElementById("maxPriceInput");
+    const applyPriceBtn = document.getElementById("applyPriceBtn");
+    const clearPriceBtn = document.getElementById("clearPriceBtn");
+
+    if (minPriceInput && currentMinPrice !== null) {
+        minPriceInput.value = currentMinPrice;
+    }
+    if (maxPriceInput && currentMaxPrice !== null) {
+        maxPriceInput.value = currentMaxPrice;
+    }
+
+    function handleApplyPrice() {
+        const rawMin = minPriceInput ? minPriceInput.value.trim() : "";
+        const rawMax = maxPriceInput ? maxPriceInput.value.trim() : "";
+
+        let minVal = rawMin !== "" ? Number(rawMin) : null;
+        let maxVal = rawMax !== "" ? Number(rawMax) : null;
+
+        if (minVal !== null && (isNaN(minVal) || minVal < 0)) minVal = null;
+        if (maxVal !== null && (isNaN(maxVal) || maxVal < 0)) maxVal = null;
+
+        // If both are provided and min > max, auto-swap for smooth UX
+        if (minVal !== null && maxVal !== null && minVal > maxVal) {
+            const temp = minVal;
+            minVal = maxVal;
+            maxVal = temp;
+            if (minPriceInput) minPriceInput.value = minVal;
+            if (maxPriceInput) maxPriceInput.value = maxVal;
+        }
+
+        currentMinPrice = minVal;
+        currentMaxPrice = maxVal;
+        applyFiltersAndRender();
+    }
+
+    if (applyPriceBtn) {
+        applyPriceBtn.addEventListener("click", handleApplyPrice);
+    }
+
+    if (clearPriceBtn) {
+        clearPriceBtn.addEventListener("click", () => {
+            if (minPriceInput) minPriceInput.value = "";
+            if (maxPriceInput) maxPriceInput.value = "";
+            currentMinPrice = null;
+            currentMaxPrice = null;
+            applyFiltersAndRender();
+        });
+    }
+
+    [minPriceInput, maxPriceInput].forEach(inp => {
+        if (inp) {
+            inp.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleApplyPrice();
+                }
+            });
+        }
+    });
+}
+
 
 /* =====================================================
    LOAD PRODUCTS
@@ -77,9 +328,23 @@ stock:
 image:
     product.image || "",
 
+images:
+    Array.isArray(product.images) && product.images.length > 0
+        ? product.images
+        : (product.image ? [product.image] : []),
+
                 description:
                     product.description ||
-                    "Handcrafted Alora jewellery."
+                    "Handcrafted Alora jewellery.",
+
+                category:
+                    determineProductCategory(product),
+
+                badge:
+                    determineProductBadge(product),
+
+                createdAt:
+                    product.createdAt || ""
             });
         });
 
@@ -87,9 +352,10 @@ image:
         /* NEW PRODUCTS FIRST */
 
         firestoreProducts.reverse();
+        allLoadedProducts = firestoreProducts;
 
-
-        renderProducts(firestoreProducts);
+        setupCollectionsControls();
+        applyFiltersAndRender();
 
     } catch (error) {
         console.error(
@@ -174,6 +440,13 @@ function renderProducts(products) {
 
         imageContainer.className =
             "product-image";
+
+        if (product.badge) {
+            const badgeEl = document.createElement("span");
+            badgeEl.className = "product-card-badge " + product.badge.className;
+            badgeEl.textContent = product.badge.text;
+            imageContainer.appendChild(badgeEl);
+        }
 
 
         const image =

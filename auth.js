@@ -12,6 +12,9 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
+    sendEmailVerification,
+    GoogleAuthProvider,
+    signInWithPopup,
     updateProfile,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
@@ -209,6 +212,27 @@ const forgotPasswordButton =
         "forgotPasswordButton"
     );
 
+const resendVerificationContainer =
+    document.getElementById(
+        "resendVerificationContainer"
+    );
+
+const resendVerificationBtn =
+    document.getElementById(
+        "resendVerificationBtn"
+    );
+
+const googleLoginBtn =
+    document.getElementById(
+        "googleLoginBtn"
+    );
+
+const googleRegisterBtn =
+    document.getElementById(
+        "googleRegisterBtn"
+    );
+
+let lastUnverifiedUser = null;
 let passwordResetInFlight = false;
 
 
@@ -381,28 +405,32 @@ registerForm.addEventListener(
                 }
             );
 
+            try {
+                if (typeof sendEmailVerification === "function") {
+                    await sendEmailVerification(user);
+                }
+            } catch (verifError) {
+                console.warn("[ALORA AUTH] sendEmailVerification error:", verifError);
+            }
 
             showMessage(
                 registerMessage,
-                "Account created successfully.",
+                "Account created! We've sent a verification link to your email. Please verify your email before logging in.",
                 true
             );
 
-
             setTimeout(function () {
-    const returnURL =
-        sessionStorage.getItem(
-            "aloraReturnUrl"
-        );
-
-    if (returnURL) {
-        window.location.href =
-            returnURL;
-    } else {
-        window.location.href =
-            "profile.html";
-    }
-}, 800);
+                showLogin();
+                if (resendVerificationContainer) {
+                    resendVerificationContainer.style.display = "block";
+                }
+                lastUnverifiedUser = user;
+                showMessage(
+                    loginMessage,
+                    "Account created! Please check your email to verify your account, then log in.",
+                    true
+                );
+            }, 1800);
         } catch (error) {
             showMessage(
                 registerMessage,
@@ -497,15 +525,15 @@ loginForm.addEventListener(
             const adminCheck =
                 await checkIsAuthorizedAdmin(user);
 
-            showMessage(
-                loginMessage,
-                "Login successful.",
-                true
-            );
-
             const adminTarget = getAdminTargetUrl();
 
             if (adminCheck.isAdmin) {
+                showMessage(
+                    loginMessage,
+                    "Login successful.",
+                    true
+                );
+
                 console.log("[ALORA AUTH DEBUG]", {
                     currentPage: "login.html",
                     file: "auth.js",
@@ -529,6 +557,12 @@ loginForm.addEventListener(
                 adminCheck.email ===
                 ALORA_ADMIN_EMAIL.toLowerCase()
             ) {
+                showMessage(
+                    loginMessage,
+                    "Login successful.",
+                    true
+                );
+
                 console.log(
                     "[ALORA AUTH DEBUG]",
                     {
@@ -548,6 +582,30 @@ loginForm.addEventListener(
                 window.location.replace(adminTarget);
                 return;
             }
+
+            // Email verification check for regular customer accounts
+            if (!user.emailVerified) {
+                lastUnverifiedUser = user;
+                if (resendVerificationContainer) {
+                    resendVerificationContainer.style.display = "block";
+                }
+                showMessage(
+                    loginMessage,
+                    "Please verify your email address to continue. Check your inbox or click 'Resend Verification Email' below."
+                );
+                setLoading(
+                    submitButton,
+                    false,
+                    "Login"
+                );
+                return;
+            }
+
+            showMessage(
+                loginMessage,
+                "Login successful.",
+                true
+            );
 
             const returnUrl =
                 sessionStorage.getItem(
@@ -685,6 +743,131 @@ forgotPasswordButton.addEventListener(
 
 
 /* =====================================================
+   RESEND EMAIL VERIFICATION
+===================================================== */
+
+if (resendVerificationBtn) {
+    resendVerificationBtn.addEventListener("click", async function () {
+        if (!lastUnverifiedUser) {
+            showMessage(
+                loginMessage,
+                "Please enter your email and password above first."
+            );
+            return;
+        }
+
+        try {
+            resendVerificationBtn.disabled = true;
+            resendVerificationBtn.textContent = "Sending...";
+
+            if (typeof sendEmailVerification === "function") {
+                await sendEmailVerification(lastUnverifiedUser);
+            }
+
+            showMessage(
+                loginMessage,
+                "Verification email resent! Please check your inbox and spam folder.",
+                true
+            );
+        } catch (err) {
+            console.error("[ALORA AUTH] Resend verification error:", err);
+            showMessage(
+                loginMessage,
+                "Could not resend email right now. Please wait a moment and try again."
+            );
+        } finally {
+            resendVerificationBtn.disabled = false;
+            resendVerificationBtn.textContent = "Resend Verification Email";
+        }
+    });
+}
+
+
+/* =====================================================
+   GOOGLE AUTHENTICATION (POPUP)
+===================================================== */
+
+async function handleGoogleSignIn() {
+    clearMessages();
+    const activeMessageEl = (registerSection && !registerSection.hidden)
+        ? registerMessage
+        : loginMessage;
+
+    try {
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+            prompt: "select_account"
+        });
+
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        if (!user) return;
+
+        // Ensure user document exists in Firestore
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap || !userSnap.exists()) {
+            await setDoc(userRef, {
+                name: user.displayName || "Customer",
+                email: user.email || "",
+                phone: user.phoneNumber || "",
+                address: "",
+                authProvider: "google",
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        const adminCheck = await checkIsAuthorizedAdmin(user);
+        const adminTarget = getAdminTargetUrl();
+
+        if (adminCheck.isAdmin || (adminCheck.email && adminCheck.email === ALORA_ADMIN_EMAIL.toLowerCase())) {
+            sessionStorage.removeItem("aloraReturnUrl");
+            window.location.replace(adminTarget);
+            return;
+        }
+
+        const returnUrl = sessionStorage.getItem("aloraReturnUrl");
+        const targetUrl = returnUrl && !returnUrl.toLowerCase().includes("admin.html")
+            ? returnUrl
+            : "profile.html";
+
+        sessionStorage.removeItem("aloraReturnUrl");
+
+        showMessage(
+            activeMessageEl,
+            "Google sign-in successful.",
+            true
+        );
+
+        setTimeout(function () {
+            window.location.href = targetUrl;
+        }, 400);
+
+    } catch (error) {
+        console.error("[ALORA AUTH] Google sign-in error:", error);
+        if (
+            error.code !== "auth/popup-closed-by-user" &&
+            error.code !== "auth/cancelled-popup-request"
+        ) {
+            showMessage(
+                activeMessageEl,
+                getAuthErrorMessage(error.code) || "Google sign-in could not be completed."
+            );
+        }
+    }
+}
+
+if (googleLoginBtn) {
+    googleLoginBtn.addEventListener("click", handleGoogleSignIn);
+}
+
+if (googleRegisterBtn) {
+    googleRegisterBtn.addEventListener("click", handleGoogleSignIn);
+}
+
+
+/* =====================================================
    HELPERS
 ===================================================== */
 
@@ -708,6 +891,10 @@ function clearMessages() {
 
     loginMessage.classList.remove("success");
     registerMessage.classList.remove("success");
+
+    if (resendVerificationContainer) {
+        resendVerificationContainer.style.display = "none";
+    }
 }
 
 

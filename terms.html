@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Terms & Conditions | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body>
+<header class="site-header">
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+    <!-- MOBILE MENU -->
+    <button
+        type="button"
+        class="menu-toggle"
+        onclick="toggleMenu()"
+        aria-label="Open navigation menu">
+        ☰
+    </button>
+
+    <!-- MAIN NAVIGATION -->
+    <nav id="navMenu">
+        <a href="index.html">Home</a>
+        <a href="collections.html">Collections</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+
+    <!-- RIGHT-SIDE ACTIONS -->
+    <div class="header-actions">
+
+        <a
+            href="wishlist.html"
+            class="header-icon-link"
+            aria-label="Wishlist">
+            <span class="header-icon">♡</span>
+            <span
+                class="header-count"
+                id="wishlistCountBadge">
+            </span>
+        </a>
+
+        <a
+            href="cart.html"
+            class="header-icon-link"
+            aria-label="Cart">
+            <span class="header-icon cart-symbol">🛒</span>
+            <span
+                class="header-count"
+                id="cartCountBadge">
+            </span>
+        </a>
+
+        <!-- ACCOUNT -->
+        <div class="account-menu">
+            <button
+                type="button"
+                class="account-button"
+                onclick="toggleAccountMenu(event)"
+                aria-label="Account">
+                👤
+            </button>
+            <div
+                class="account-dropdown"
+                id="accountDropdown">
+                <a href="profile.html">👤 My Profile</a>
+                <a href="my-orders.html">📦 My Orders</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- BANNER -->
+<section class="page-banner">
+    <p>TERMS OF SERVICE</p>
+    <h1>Terms & Conditions</h1>
+    <span>Last updated: September 2026</span>
+</section>
+
+<!-- MAIN CONTENT -->
+<main class="legal-container">
+    <div class="legal-card">
+        <section class="legal-section">
+            <h2>1. Acceptance of Terms</h2>
+            <p>
+                By accessing or using the <strong>Alora Handmade Jewelry</strong> website (<a href="https://alora-handmade-jewelry.web.app">alora-handmade-jewelry.web.app</a>), registering an account, or placing an order, you agree to be bound by these Terms and Conditions and our <a href="privacy-policy.html">Privacy Policy</a>. If you do not agree with any part of these terms, please do not use our website.
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2>2. Handcrafted Jewelry Characteristics</h2>
+            <p>
+                Each piece at Alora is individually handcrafted by skilled artisans. Because of the nature of artisanal handmade craftsmanship:
+            </p>
+            <ul>
+                <li>Slight natural variations in stone shade, bead texture, wire-wrapping, and finish are inherent to handmade artistry and should not be considered defects.</li>
+                <li>Product photographs are captured with care, but screen displays, lighting conditions, and device calibrations may cause subtle differences between the image and the physical piece.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>3. Pricing & Product Availability</h2>
+            <p>
+                All prices on Alora are quoted in Indian Rupees (₹ INR). Prices and stock availability are subject to change without prior notice. In the rare event an item becomes unavailable after order placement, we will contact you immediately to offer an alternative, store credit, or a prompt refund.
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2>4. Payment Methods & Verification</h2>
+            <p>
+                We offer secure payment options for our customers:
+            </p>
+            <ul>
+                <li><strong>Online Payment via UPI:</strong> Pay directly using any UPI-enabled app (Google Pay, PhonePe, Paytm, BHIM) using our generated dynamic QR code or UPI ID (<code>9392159623@ybl</code>). You must provide your 12-digit UPI Reference / UTR number during checkout. Orders placed via UPI remain in <em>Payment Verification Pending</em> until verified by our accounts team.</li>
+                <li><strong>Cash on Delivery (COD):</strong> Available for select pin codes. Payment must be made in full upon parcel delivery.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section" id="shipping">
+            <h2>5. Shipping & Delivery</h2>
+            <ul>
+                <li><strong>Dispatch Timeline:</strong> In-stock handcrafted items are carefully packaged and dispatched within <strong>2 to 3 business days</strong> after order confirmation and payment verification.</li>
+                <li><strong>Delivery Timeline:</strong> Standard courier delivery typically takes <strong>5 to 7 business days</strong> across India, depending on destination pincode and regional logistics.</li>
+                <li><strong>Tracking:</strong> You can track your order status live in your <a href="my-orders.html">My Orders</a> dashboard.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section" id="cancellations">
+            <h2>6. Order Cancellations</h2>
+            <p>
+                You may request cancellation of an order through your <a href="my-orders.html">My Orders</a> dashboard while the status is still <strong>Order Received</strong> or <strong>Confirmed</strong>. Once an order enters <strong>Processing</strong> or has been <strong>Shipped</strong>, cancellation is no longer possible as the parcel has been assigned to our logistics partner.
+            </p>
+        </section>
+
+        <section class="legal-section" id="returns">
+            <h2>7. Returns & Exchanges</h2>
+            <p>
+                Customer satisfaction is paramount at Alora. We provide a <strong>7-day return and exchange window</strong> from the date of confirmed delivery under the following conditions:
+            </p>
+            <ul>
+                <li>Eligible cases include items that arrived damaged in transit, defective, or incorrect.</li>
+                <li>An unboxing video showing the sealed parcel being opened is strongly recommended to substantiate transit damage claims.</li>
+                <li>Returned items must be unused, in their original packaging, with tags and tamper seals intact.</li>
+                <li>Customized jewelry made specifically to customer specifications is non-returnable unless defective.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>8. Jewelry Care Guidelines</h2>
+            <p>
+                To maintain the luster and longevity of your handcrafted jewelry:
+            </p>
+            <ul>
+                <li>Avoid direct contact with water, sweat, perfumes, hairsprays, and cleaning chemicals.</li>
+                <li>Store each piece separately in an airtight ziplock pouch or velvet box away from direct sunlight.</li>
+                <li>Gently wipe with a soft, lint-free cloth after wear before storing.</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2>9. Intellectual Property</h2>
+            <p>
+                All designs, photographs, product descriptions, logo marks, monograms, brand text, and code on this website are the intellectual property of Alora Handmade Jewelry. Unauthorized reproduction or commercial use is strictly prohibited.
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2>10. Contact Us</h2>
+            <p>
+                For questions regarding these Terms & Conditions or assistance with an order:
+            </p>
+            <ul>
+                <li><strong>Email:</strong> <a href="mailto:alorajewels26@gmail.com">alorajewels26@gmail.com</a></li>
+                <li><strong>WhatsApp / Phone:</strong> <a href="https://wa.me/919392159623">+91 9392159623</a></li>
+                <li><strong>Address:</strong> Palacole, India</li>
+            </ul>
+        </section>
+    </div>
+</main>
+
+<!-- FLOATING WHATSAPP CTA -->
+<a href="https://wa.me/919392159623?text=Hi%20Alora%2C%20I%20have%20an%20inquiry%20about%20your%20jewellery" target="_blank" rel="noopener" class="floating-whatsapp-btn" aria-label="Chat with Alora on WhatsApp">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.592 2.654-.696c1.004.577 1.83.844 2.806.845h.005c3.18 0 5.767-2.587 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zm9.969 5.828c0 5.523-4.477 10-10 10-1.74 0-3.37-.444-4.805-1.222L2 22l1.246-5.069A9.957 9.957 0 012 12c0-5.523 4.477-10 10-10s10 4.477 10 10z"/>
+    </svg>
+</a>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-col footer-brand-col">
+            <div class="footer-brand">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="footer-logo">
+                <span class="footer-brand-name">Alora</span>
+            </div>
+            <p class="footer-desc">
+                Handcrafted luxury jewelry made with elegance and love. Discover timeless designs crafted for every celebration.
+            </p>
+            <div class="footer-contact-item">
+                <span>📍</span>
+                <span>Hyderabad, India</span>
+            </div>
+            <div class="footer-contact-item">
+                <span>✉️</span>
+                <a href="mailto:alorajewels26@gmail.com">alorajewels26@gmail.com</a>
+            </div>
+            <div class="footer-contact-item">
+                <span>📞</span>
+                <a href="https://wa.me/919392159623" target="_blank" rel="noopener">+91 9392159623</a>
+            </div>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="footer-heading">SHOP</h4>
+            <ul class="footer-links">
+                <li><a href="collections.html?category=Earrings">Earrings</a></li>
+                <li><a href="collections.html?category=Necklaces">Necklaces</a></li>
+                <li><a href="collections.html?category=Bangles">Bangles</a></li>
+                <li><a href="collections.html?category=Hair%20Pins">Hair Pins</a></li>
+                <li><a href="collections.html?category=Rings">Rings</a></li>
+                <li><a href="collections.html">All Collections</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="footer-heading">HELP & SUPPORT</h4>
+            <ul class="footer-links">
+                <li><a href="contact.html">Contact Us</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="my-orders.html">Track Order</a></li>
+                <li><a href="terms.html#shipping">Shipping & Delivery</a></li>
+                <li><a href="terms.html#returns">Returns & Exchanges</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="footer-heading">LEGAL & SOCIAL</h4>
+            <ul class="footer-links">
+                <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms & Conditions</a></li>
+            </ul>
+            <h4 class="footer-heading" style="margin-top: 20px;">CONNECT</h4>
+            <div class="footer-social-links">
+                <a href="https://www.instagram.com/alor_ajewels/" target="_blank" rel="noopener" class="footer-social-btn" aria-label="Instagram">
+                    <span>📷 Instagram</span>
+                </a>
+                <a href="https://wa.me/919392159623" target="_blank" rel="noopener" class="footer-social-btn" aria-label="WhatsApp">
+                    <span>💬 WhatsApp</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 Alora Handmade Jewelry. Handcrafted with passion in India.</p>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

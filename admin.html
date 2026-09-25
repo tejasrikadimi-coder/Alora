@@ -180,15 +180,35 @@
 
     <div
         class="admin-stat-card"
+        id="adminDeliveredOrdersCard"
+        role="button"
+        tabindex="0">
+        <span>Delivered</span>
+        <strong id="adminDeliveredOrders">
+            0
+        </strong>
+    </div>
+
+    <div
+        class="admin-stat-card"
         id="adminRequestsCard"
         role="button"
         tabindex="0">
-        
         <span>Requests</span>
         <strong id="adminRequestCount">
             0
         </strong>
+    </div>
 
+    <div
+        class="admin-stat-card"
+        id="adminReviewsCard"
+        role="button"
+        tabindex="0">
+        <span>Reviews</span>
+        <strong id="adminTotalReviews">
+            0
+        </strong>
     </div>
 
 </section>
@@ -317,6 +337,47 @@
                             min="0"
                             required
                         >
+
+                    </div>
+
+
+                    <!-- PRODUCT CATEGORY -->
+
+                    <div class="admin-form-group">
+
+                        <label for="adminProductCategory">
+                            Category
+                        </label>
+
+                        <select id="adminProductCategory">
+                            <option value="">Auto-Detect / Select Category</option>
+                            <option value="Earrings">Earrings</option>
+                            <option value="Necklaces">Necklaces</option>
+                            <option value="Bangles">Bangles</option>
+                            <option value="Hair Pins">Hair Pins</option>
+                            <option value="Kids Jewellery">Kids Jewellery</option>
+                            <option value="Rings">Rings</option>
+                            <option value="Custom Jewellery">Custom Jewellery</option>
+                        </select>
+
+                    </div>
+
+
+                    <!-- PRODUCT BADGE -->
+
+                    <div class="admin-form-group">
+
+                        <label for="adminProductBadge">
+                            Badge (Optional)
+                        </label>
+
+                        <select id="adminProductBadge">
+                            <option value="">None / Auto</option>
+                            <option value="NEW">NEW</option>
+                            <option value="BEST SELLER">BEST SELLER</option>
+                            <option value="CUSTOMIZABLE">CUSTOMIZABLE</option>
+                            <option value="OUT OF STOCK">OUT OF STOCK</option>
+                        </select>
 
                     </div>
 
@@ -524,6 +585,34 @@
         </section>
 
 
+        <!-- =================================================
+             CUSTOMER REVIEWS MODERATION
+        ================================================== -->
+
+        <section class="admin-reviews-section">
+
+            <div class="admin-section-title">
+
+                <p>CUSTOMER FEEDBACK</p>
+
+                <h2>Product Reviews Moderation</h2>
+
+            </div>
+
+            <div
+                class="admin-reviews-list"
+                id="adminReviewsList"
+            >
+
+                <div class="admin-loading">
+                    Loading customer reviews...
+                </div>
+
+            </div>
+
+        </section>
+
+
     </div>
 
 </main>
@@ -624,6 +713,47 @@
                     min="0"
                     required
                 >
+
+            </div>
+
+
+            <!-- EDIT PRODUCT CATEGORY -->
+
+            <div class="admin-form-group">
+
+                <label for="adminEditProductCategory">
+                    Category
+                </label>
+
+                <select id="adminEditProductCategory">
+                    <option value="">Auto-Detect / Select Category</option>
+                    <option value="Earrings">Earrings</option>
+                    <option value="Necklaces">Necklaces</option>
+                    <option value="Bangles">Bangles</option>
+                    <option value="Hair Pins">Hair Pins</option>
+                    <option value="Kids Jewellery">Kids Jewellery</option>
+                    <option value="Rings">Rings</option>
+                    <option value="Custom Jewellery">Custom Jewellery</option>
+                </select>
+
+            </div>
+
+
+            <!-- EDIT PRODUCT BADGE -->
+
+            <div class="admin-form-group">
+
+                <label for="adminEditProductBadge">
+                    Badge (Optional)
+                </label>
+
+                <select id="adminEditProductBadge">
+                    <option value="">None / Auto</option>
+                    <option value="NEW">NEW</option>
+                    <option value="BEST SELLER">BEST SELLER</option>
+                    <option value="CUSTOMIZABLE">CUSTOMIZABLE</option>
+                    <option value="OUT OF STOCK">OUT OF STOCK</option>
+                </select>
 
             </div>
 

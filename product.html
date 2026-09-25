@@ -132,10 +132,14 @@
 
         <div class="product-detail-image">
 
+            <div id="productBadgeContainer"></div>
+
             <img
                 id="productImage"
                 src=""
                 alt="Product Image">
+
+            <div class="product-thumbnail-gallery" id="productThumbnailGallery"></div>
 
         </div>
 
@@ -151,6 +155,11 @@
             <h1 id="productName">
                 Jewellery
             </h1>
+
+            <div class="product-rating-badge" id="productRatingBadge" style="display:none;">
+                <span class="stars" id="productRatingStars">★★★★★</span>
+                <span class="rating-text" id="productRatingText">5.0 (0 reviews)</span>
+            </div>
 
             <div class="price" id="productPrice">
                 ₹0
@@ -239,17 +248,137 @@
                 aria-live="polite">
             </p>
 
+            <!-- POLICY ACCORDION -->
+            <div class="product-policy-tabs">
+                <details class="product-policy-tab" open>
+                    <summary>🚚 Delivery &amp; Shipping</summary>
+                    <div class="product-policy-content">
+                        Dispatched in 2–3 business days. Delivery in 5–7 business days across India via insured courier. Free shipping on prepaid orders above ₹999.
+                    </div>
+                </details>
+                <details class="product-policy-tab">
+                    <summary>🔄 7-Day Returns &amp; Exchanges</summary>
+                    <div class="product-policy-content">
+                        Eligible for exchange or return within 7 days of delivery in original condition. Please record an uninterrupted 360° unboxing video for transit damage claims.
+                    </div>
+                </details>
+                <details class="product-policy-tab">
+                    <summary>✨ Jewelry Care &amp; Longevity</summary>
+                    <div class="product-policy-content">
+                        Keep away from moisture, hairspray, and perfumes. Store individually in soft pouches or airtight zip covers to preserve polish and stone settings.
+                    </div>
+                </details>
+            </div>
+
         </div>
 
     </div>
 
 </main>
 
+<!-- RELATED PRODUCTS -->
+<section class="related-products-section" id="relatedProductsSection">
+    <h2>You May Also Like</h2>
+    <div class="products" id="relatedProductsContainer">
+        <!-- Rendered dynamically -->
+    </div>
+</section>
 
-<footer>
-    © 2026 Alora Handmade Jewelry
+<!-- CUSTOMER REVIEWS -->
+<section class="product-reviews-section" id="productReviewsSection">
+    <div class="product-reviews-header">
+        <h2>Customer Reviews</h2>
+        <span id="productReviewsSummary" style="font-size: 14px; color: var(--gold); font-weight: 600;"></span>
+    </div>
+    <div class="review-list" id="productReviewsList">
+        <p style="color: var(--sub); font-size: 13.5px;">No reviews yet for this product. Be the first to share your experience!</p>
+    </div>
+</section>
+
+<!-- MOBILE STICKY BOTTOM ACTIONS -->
+<div class="mobile-sticky-actions" id="mobileStickyActions">
+    <div class="mobile-sticky-price" id="mobileStickyPrice">₹0</div>
+    <div class="mobile-sticky-buttons">
+        <button type="button" class="mobile-sticky-cart-btn" id="stickyCartBtn" onclick="addCurrentProductToCart()">Add to Cart</button>
+        <button type="button" class="mobile-sticky-buy-btn" id="stickyBuyBtn" onclick="buyNow()">Buy Now</button>
+    </div>
+</div>
+
+<!-- FLOATING WHATSAPP CTA -->
+<a href="https://wa.me/919392159623?text=Hi%20Alora%2C%20I%20have%20an%20inquiry%20about%20your%20jewellery" target="_blank" rel="noopener" class="floating-whatsapp-btn" aria-label="Chat with Alora on WhatsApp">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.592 2.654-.696c1.004.577 1.83.844 2.806.845h.005c3.18 0 5.767-2.587 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zm9.969 5.828c0 5.523-4.477 10-10 10-1.74 0-3.37-.444-4.805-1.222L2 22l1.246-5.069A9.957 9.957 0 012 12c0-5.523 4.477-10 10-10s10 4.477 10 10z"/>
+    </svg>
+</a>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-col footer-brand-col">
+            <div class="footer-brand">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="footer-logo">
+                <span class="footer-brand-name">Alora</span>
+            </div>
+            <p class="footer-desc">
+                Handcrafted luxury jewelry made with elegance and love. Discover timeless designs crafted for every celebration.
+            </p>
+            <div class="footer-contact-item">
+                <span>📍</span>
+                <span>Palacole, India</span>
+            </div>
+            <div class="footer-contact-item">
+                <span>✉️</span>
+                <a href="mailto:alorajewels26@gmail.com">alorajewels26@gmail.com</a>
+            </div>
+            <div class="footer-contact-item">
+                <span>📞</span>
+                <a href="https://wa.me/919392159623" target="_blank" rel="noopener">+91 9392159623</a>
+            </div>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="footer-heading">SHOP</h4>
+            <ul class="footer-links">
+                <li><a href="collections.html?category=Earrings">Earrings</a></li>
+                <li><a href="collections.html?category=Necklaces">Necklaces</a></li>
+                <li><a href="collections.html?category=Bangles">Bangles</a></li>
+                <li><a href="collections.html?category=Hair%20Pins">Hair Pins</a></li>
+                <li><a href="collections.html?category=Rings">Rings</a></li>
+                <li><a href="collections.html">All Collections</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="footer-heading">HELP & SUPPORT</h4>
+            <ul class="footer-links">
+                <li><a href="contact.html">Contact Us</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="my-orders.html">Track Order</a></li>
+                <li><a href="terms.html#shipping">Shipping & Delivery</a></li>
+                <li><a href="terms.html#returns">Returns & Exchanges</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4 class="footer-heading">LEGAL & SOCIAL</h4>
+            <ul class="footer-links">
+                <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms & Conditions</a></li>
+            </ul>
+            <h4 class="footer-heading" style="margin-top: 20px;">CONNECT</h4>
+            <div class="footer-social-links">
+                <a href="https://www.instagram.com/alor_ajewels/" target="_blank" rel="noopener" class="footer-social-btn" aria-label="Instagram">
+                    <span>📷 Instagram</span>
+                </a>
+                <a href="https://wa.me/919392159623" target="_blank" rel="noopener" class="footer-social-btn" aria-label="WhatsApp">
+                    <span>💬 WhatsApp</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 Alora Handmade Jewelry. Handcrafted with passion in India.</p>
+    </div>
 </footer>
-
 
 <script src="script.js"></script>
 

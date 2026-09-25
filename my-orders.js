@@ -148,9 +148,11 @@ async function loadFirebaseOrders(userId) {
 ===================================================== */
 
 function createOrderCard(orderId, order) {
+    window.activeOrdersMap = window.activeOrdersMap || {};
+    window.activeOrdersMap[orderId] = order;
+
     const card =
         document.createElement("article");
-
 
     card.className =
         "order-history-card";
@@ -550,24 +552,17 @@ function renderOrderActions(
     /* DELIVERED */
 
     if (normalizedStatus === "delivered") {
+        let returnActionsHtml = "";
 
         /* RETURN PERIOD ENDED */
-
         if (!isWithinReturnPeriod(order)) {
-            container.innerHTML = `
+            returnActionsHtml = `
                 <span class="return-period-ended">
                     Return and exchange period ended
                 </span>
             `;
-
-            return;
-        }
-
-
-        /* RETURN REQUEST EXISTS */
-
-        if (requests.return) {
-            container.innerHTML = `
+        } else if (requests.return) {
+            returnActionsHtml = `
                 <span class="request-result pending">
                     Return ${escapeHTML(
                         requests.return.status ||
@@ -575,15 +570,8 @@ function renderOrderActions(
                     )}
                 </span>
             `;
-
-            return;
-        }
-
-
-        /* EXCHANGE REQUEST EXISTS */
-
-        if (requests.exchange) {
-            container.innerHTML = `
+        } else if (requests.exchange) {
+            returnActionsHtml = `
                 <span class="request-result pending">
                     Exchange ${escapeHTML(
                         requests.exchange.status ||
@@ -591,35 +579,53 @@ function renderOrderActions(
                     )}
                 </span>
             `;
+        } else {
+            returnActionsHtml = `
+                <button
+                    type="button"
+                    class="return-order-button"
+                    onclick="openOrderRequest(
+                        '${orderId}',
+                        'return'
+                    )">
+                    Return Item
+                </button>
 
-            return;
+                <button
+                    type="button"
+                    class="exchange-order-button"
+                    onclick="openOrderRequest(
+                        '${orderId}',
+                        'exchange'
+                    )">
+                    Exchange Item
+                </button>
+            `;
         }
 
-
-        /* SHOW RETURN + EXCHANGE */
-
         container.innerHTML = `
+            ${returnActionsHtml}
             <button
                 type="button"
-                class="return-order-button"
-                onclick="openOrderRequest(
-                    '${orderId}',
-                    'return'
-                )">
-                Return Item
-            </button>
-
-
-            <button
-                type="button"
-                class="exchange-order-button"
-                onclick="openOrderRequest(
-                    '${orderId}',
-                    'exchange'
-                )">
-                Exchange Item
+                class="rate-product-btn"
+                id="reviewBtn-${orderId}"
+                onclick="openReviewModal('${orderId}')">
+                ⭐ Rate &amp; Review
             </button>
         `;
+
+        const safeKey = (order.productId || (order.products || "item")).replace(/[^a-zA-Z0-9]/g, '_');
+        const reviewDocRef = doc(db, "reviews", `${orderId}_${safeKey}`);
+        getDoc(reviewDocRef).then(snap => {
+            const btn = document.getElementById(`reviewBtn-${orderId}`);
+            if (btn && snap && typeof snap.exists === "function" && snap.exists()) {
+                const data = snap.data();
+                btn.textContent = `✓ Reviewed (★ ${data.rating || 5})`;
+                btn.disabled = true;
+                btn.style.opacity = "0.7";
+                btn.style.cursor = "default";
+            }
+        }).catch(() => {});
 
         return;
     }
@@ -1291,3 +1297,98 @@ function escapeHTML(text) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+/* =====================================================
+   CUSTOMER REVIEW MODAL & SUBMISSION
+===================================================== */
+
+window.openReviewModal = async function(orderId) {
+    const order = window.activeOrdersMap ? window.activeOrdersMap[orderId] : null;
+    if (!order) return;
+
+    let modal = document.getElementById("reviewModalBackdrop");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "reviewModalBackdrop";
+        modal.className = "review-modal-backdrop";
+        document.body.appendChild(modal);
+    }
+
+    const productName = order.products || (Array.isArray(order.items) && order.items[0] ? order.items[0].name : "Jewellery");
+    const safeKey = (order.productId || productName).replace(/[^a-zA-Z0-9]/g, '_');
+
+    modal.innerHTML = `
+        <div class="review-modal">
+            <h3>Rate &amp; Review Product</h3>
+            <p style="font-size: 13.5px; color: var(--text); margin-bottom: 14px;">Product: <strong>${escapeHTML(productName)}</strong></p>
+            <div class="interactive-stars" id="interactiveStars">
+                <span class="star selected" data-value="1">★</span>
+                <span class="star selected" data-value="2">★</span>
+                <span class="star selected" data-value="3">★</span>
+                <span class="star selected" data-value="4">★</span>
+                <span class="star selected" data-value="5">★</span>
+            </div>
+            <textarea id="reviewModalText" placeholder="Share your experience with this jewelry (craftsmanship, finish, packaging, etc.)..."></textarea>
+            <div class="review-modal-buttons">
+                <button type="button" class="btn" style="background:#e0dedb; color:#222; padding: 8px 16px; border-radius:6px; font-size:13px;" onclick="closeReviewModal()">Cancel</button>
+                <button type="button" class="rate-product-btn" id="confirmReviewBtn">Submit Review</button>
+            </div>
+        </div>
+    `;
+
+    modal.style.display = "flex";
+
+    let selectedRating = 5;
+    const starEls = modal.querySelectorAll(".interactive-stars .star");
+    starEls.forEach(star => {
+        star.addEventListener("click", () => {
+            selectedRating = Number(star.dataset.value);
+            starEls.forEach(s => {
+                s.classList.toggle("selected", Number(s.dataset.value) <= selectedRating);
+            });
+        });
+    });
+
+    const confirmBtn = document.getElementById("confirmReviewBtn");
+    confirmBtn.addEventListener("click", async () => {
+        const text = document.getElementById("reviewModalText").value.trim();
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = "Submitting...";
+
+        try {
+            await setDoc(doc(db, "reviews", `${orderId}_${safeKey}`), {
+                userId: currentUserId || "",
+                customerName: order.name || order.customerName || "Verified Buyer",
+                orderId: orderId,
+                productId: order.productId || "",
+                productName: productName,
+                rating: selectedRating,
+                reviewText: text,
+                status: "approved",
+                createdAt: new Date().toISOString()
+            });
+
+            closeReviewModal();
+            const btn = document.getElementById(`reviewBtn-${orderId}`);
+            if (btn) {
+                btn.textContent = `✓ Reviewed (★ ${selectedRating})`;
+                btn.disabled = true;
+                btn.style.opacity = "0.7";
+                btn.style.cursor = "default";
+            }
+            alert("Thank you! Your review has been submitted successfully.");
+        } catch (err) {
+            console.error("Review submission failed:", err);
+            alert("Could not submit your review right now. Please try again.");
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "Submit Review";
+        }
+    });
+};
+
+window.closeReviewModal = function() {
+    const modal = document.getElementById("reviewModalBackdrop");
+    if (modal) {
+        modal.style.display = "none";
+    }
+};

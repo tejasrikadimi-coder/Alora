@@ -11,14 +11,16 @@ import {
 import {
     onAuthStateChanged,
     updateProfile,
-    signOut
+    signOut,
+    deleteUser
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 import {
     doc,
     getDoc,
-    setDoc
+    setDoc,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
@@ -425,3 +427,58 @@ if (returnURL) {
         }
     }
 );
+
+
+/* =====================================================
+   DELETE ACCOUNT (GDPR / PRIVACY RIGHTS)
+===================================================== */
+
+const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener("click", async function () {
+        if (!currentUser) return;
+
+        const email = (currentUser.email || "").toLowerCase().trim();
+        if (email === "alorajewels26@gmail.com") {
+            alert("The primary administrator account cannot be deleted.");
+            return;
+        }
+
+        const confirmFirst = confirm("Warning: Deleting your account will permanently remove your profile, address, and saved details from Alora.\n\nAre you sure you want to proceed?");
+        if (!confirmFirst) return;
+
+        const confirmWord = prompt("To confirm deletion, please type DELETE below:");
+        if (confirmWord !== "DELETE") {
+            alert("Deletion cancelled. The confirmation text did not match.");
+            return;
+        }
+
+        deleteAccountBtn.disabled = true;
+        deleteAccountBtn.textContent = "Deleting Account...";
+
+        try {
+            // Delete Firestore user profile document
+            await deleteDoc(doc(db, "users", currentUser.uid));
+
+            // Delete Auth account
+            await deleteUser(currentUser);
+
+            // Clear local guest storage
+            localStorage.removeItem("aloraWishlist");
+            localStorage.removeItem("aloraCart");
+            sessionStorage.removeItem("aloraReturnUrl");
+
+            alert("Your account and associated profile data have been permanently deleted. Thank you for being a part of Alora.");
+            window.location.href = "index.html";
+        } catch (error) {
+            console.error("Account deletion failed:", error);
+            if (error.code === "auth/requires-recent-login") {
+                alert("For security reasons, please log out and log back in, then retry deleting your account.");
+            } else {
+                alert("Account deletion failed: " + (error.message || "Please try again later."));
+            }
+            deleteAccountBtn.disabled = false;
+            deleteAccountBtn.textContent = "Delete My Account";
+        }
+    });
+}

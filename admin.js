@@ -343,6 +343,7 @@ onAuthStateChanged(
 
             await loadAllOrders();
             await loadAdminMessages();
+            await loadAdminReviews();
             openDirectOrderFromUrl();
 
         } catch (error) {
@@ -916,6 +917,13 @@ function updateStatistics() {
             0
         );
 
+    const deliveredOrders =
+        allAdminOrders.filter(
+            order =>
+                normalizeStatus(
+                    order.data.status
+                ) === "delivered"
+        ).length;
 
     adminTotalOrders.textContent =
         total;
@@ -925,6 +933,13 @@ function updateStatistics() {
 
     adminShippedOrders.textContent =
         shippedOrders;
+
+    const adminDeliveredOrdersEl =
+        document.getElementById("adminDeliveredOrders");
+    if (adminDeliveredOrdersEl) {
+        adminDeliveredOrdersEl.textContent =
+            deliveredOrders;
+    }
 
     adminRequestCount.textContent =
         requestCount;
@@ -2926,22 +2941,25 @@ if (adminProductForm) {
                 const newDocRef =
                     doc(productsReference);
 
-                await setDoc(
-                    newDocRef,
-                    {
-                        name: name,
-                        price: price,
-                        stock: stock,
-                        image: finalImageUrl,
-                        description: description,
-                        active: true,
-                        createdAt:
-                            serverTimestamp(),
+                const catEl = document.getElementById("adminProductCategory");
+                const badgeEl = document.getElementById("adminProductBadge");
+                const categoryVal = catEl ? catEl.value.trim() : "";
+                const badgeVal = badgeEl ? badgeEl.value.trim() : "";
 
-                        createdAtISO:
-                            new Date().toISOString()
-                    }
-                );
+                const productData = {
+                    name: name,
+                    price: price,
+                    stock: stock,
+                    image: finalImageUrl,
+                    description: description,
+                    active: true,
+                    createdAt: serverTimestamp(),
+                    createdAtISO: new Date().toISOString()
+                };
+                if (categoryVal) productData.category = categoryVal;
+                if (badgeVal) productData.badge = badgeVal;
+
+                await setDoc(newDocRef, productData);
 
                 await loadAdminProducts();
 
@@ -3539,6 +3557,16 @@ function openAdminProductEditor(product) {
     adminEditProductDescription.value =
         product.description;
 
+    const adminEditProductCategory = document.getElementById("adminEditProductCategory");
+    if (adminEditProductCategory) {
+        adminEditProductCategory.value = product.category || "";
+    }
+
+    const adminEditProductBadge = document.getElementById("adminEditProductBadge");
+    if (adminEditProductBadge) {
+        adminEditProductBadge.value = product.badge || "";
+    }
+
     if (adminEditProductImageFile) {
         adminEditProductImageFile.value = "";
     }
@@ -3731,16 +3759,25 @@ if (adminEditProductForm) {
                     adminSaveProductButton.textContent = "Saving Product...";
                 }
 
+                const adminEditProductCategory = document.getElementById("adminEditProductCategory");
+                const adminEditProductBadge = document.getElementById("adminEditProductBadge");
+                const editCategory = adminEditProductCategory ? adminEditProductCategory.value.trim() : "";
+                const editBadge = adminEditProductBadge ? adminEditProductBadge.value.trim() : "";
+
+                const updatePayload = {
+                    name: name,
+                    price: price,
+                    stock: stock,
+                    image: finalImageUrl,
+                    description: description,
+                    category: editCategory,
+                    badge: editBadge,
+                    updatedAt: serverTimestamp()
+                };
+
                 await updateDoc(
                     doc(db, "products", productId),
-                    {
-                        name: name,
-                        price: price,
-                        stock: stock,
-                        image: finalImageUrl,
-                        description: description,
-                        updatedAt: serverTimestamp()
-                    }
+                    updatePayload
                 );
 
                 showAdminEditMessage(
@@ -3950,3 +3987,141 @@ function escapeAdminHTML(text) {
 ===================================================== */
 
 loadAdminProducts();
+
+/* =====================================================
+   CUSTOMER REVIEWS MODERATION
+===================================================== */
+
+async function loadAdminReviews() {
+    const adminReviewsList = document.getElementById("adminReviewsList");
+    const adminTotalReviewsEl = document.getElementById("adminTotalReviews");
+    if (!adminReviewsList) {
+        return;
+    }
+
+    adminReviewsList.innerHTML = `
+        <div class="admin-loading">
+            Loading customer reviews...
+        </div>
+    `;
+
+    try {
+        const reviewsRef = collection(db, "reviews");
+        const reviewsSnap = await getDocs(reviewsRef);
+
+        const reviews = [];
+        reviewsSnap.forEach(docSnap => {
+            reviews.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        reviews.sort((a, b) => {
+            const timeA = a.createdAtISO || (a.createdAt && a.createdAt.seconds ? new Date(a.createdAt.seconds * 1000).toISOString() : "");
+            const timeB = b.createdAtISO || (b.createdAt && b.createdAt.seconds ? new Date(b.createdAt.seconds * 1000).toISOString() : "");
+            return timeB.localeCompare(timeA);
+        });
+
+        if (adminTotalReviewsEl) {
+            adminTotalReviewsEl.textContent = reviews.length;
+        }
+
+        if (reviews.length === 0) {
+            adminReviewsList.innerHTML = `
+                <div style="text-align:center; padding: 25px; color: #888;">
+                    No customer reviews submitted yet.
+                </div>
+            `;
+            return;
+        }
+
+        adminReviewsList.innerHTML = "";
+
+        reviews.forEach(review => {
+            const item = document.createElement("div");
+            item.className = "admin-review-item" + (review.status === "hidden" ? " hidden-review" : "");
+
+            const rating = Number(review.rating) || 5;
+            const safeRating = Math.min(5, Math.max(1, rating));
+            const stars = "★".repeat(safeRating) + "☆".repeat(5 - safeRating);
+
+            const dateStr = review.createdAtISO
+                ? new Date(review.createdAtISO).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+                : "Recently";
+
+            const productImgHtml = review.productImage
+                ? `<img src="${escapeAdminHTML(review.productImage)}" alt="${escapeAdminHTML(review.productName || 'Product')}" class="admin-review-thumb">`
+                : `<div class="admin-review-thumb" style="display:flex;align-items:center;justify-content:center;color:#b68b00;font-size:24px;">★</div>`;
+
+            item.innerHTML = `
+                ${productImgHtml}
+                <div class="admin-review-info">
+                    <div class="admin-review-header">
+                        <span class="admin-review-customer">${escapeAdminHTML(review.customerName || "Customer")}</span>
+                        <span class="admin-review-stars">${stars}</span>
+                        <span class="admin-review-date">${dateStr}</span>
+                    </div>
+                    <div class="admin-review-product">${escapeAdminHTML(review.productName || "Verified Purchase")}</div>
+                    <div class="admin-review-text">${escapeAdminHTML(review.comment || "No comment provided.")}</div>
+                </div>
+                <div class="admin-review-actions">
+                    <button type="button" class="admin-review-btn toggle" data-id="${escapeAdminHTML(review.id)}" data-status="${escapeAdminHTML(review.status || 'approved')}">
+                        ${review.status === "hidden" ? "Approve" : "Hide"}
+                    </button>
+                    <button type="button" class="admin-review-btn delete" data-id="${escapeAdminHTML(review.id)}">
+                        Delete
+                    </button>
+                </div>
+            `;
+
+            const toggleBtn = item.querySelector(".toggle");
+            if (toggleBtn) {
+                toggleBtn.addEventListener("click", async () => {
+                    const currentStatus = toggleBtn.getAttribute("data-status");
+                    const newStatus = currentStatus === "hidden" ? "approved" : "hidden";
+                    toggleBtn.disabled = true;
+                    toggleBtn.textContent = "Updating...";
+                    try {
+                        await updateDoc(doc(db, "reviews", review.id), { status: newStatus });
+                        await loadAdminReviews();
+                    } catch (err) {
+                        console.error("Error updating review:", err);
+                        alert("Could not update review status.");
+                        toggleBtn.disabled = false;
+                        toggleBtn.textContent = currentStatus === "hidden" ? "Approve" : "Hide";
+                    }
+                });
+            }
+
+            const deleteBtn = item.querySelector(".delete");
+            if (deleteBtn) {
+                deleteBtn.addEventListener("click", async () => {
+                    if (!window.confirm("Are you sure you want to permanently delete this customer review?")) {
+                        return;
+                    }
+                    deleteBtn.disabled = true;
+                    deleteBtn.textContent = "Deleting...";
+                    try {
+                        await deleteDoc(doc(db, "reviews", review.id));
+                        await loadAdminReviews();
+                    } catch (err) {
+                        console.error("Error deleting review:", err);
+                        alert("Could not delete review.");
+                        deleteBtn.disabled = false;
+                        deleteBtn.textContent = "Delete";
+                    }
+                });
+            }
+
+            adminReviewsList.appendChild(item);
+        });
+
+    } catch (err) {
+        console.error("Error loading reviews:", err);
+        adminReviewsList.innerHTML = `
+            <div style="text-align:center; padding: 25px; color: #c92a2a;">
+                Failed to load reviews.
+            </div>
+        `;
+    }
+}
+
+window.loadAdminReviews = loadAdminReviews;

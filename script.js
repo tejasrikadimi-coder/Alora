@@ -1033,8 +1033,269 @@ function renderProductDetails(product) {
         }
     }
 
+    // Product Badges
+    const badgeContainer = document.getElementById("productBadgeContainer");
+    if (badgeContainer) {
+        badgeContainer.innerHTML = "";
+        if (product.badge) {
+            const b = document.createElement("span");
+            b.className = "product-card-badge " + product.badge.className;
+            b.textContent = product.badge.text;
+            badgeContainer.appendChild(b);
+        }
+    }
+
+    // Thumbnail gallery
+    const thumbGallery = document.getElementById("productThumbnailGallery");
+    if (thumbGallery) {
+        thumbGallery.innerHTML = "";
+        const allImgs = Array.isArray(product.images) && product.images.length > 0
+            ? product.images
+            : (product.image ? [product.image] : []);
+        if (allImgs.length > 1) {
+            allImgs.forEach((imgUrl, idx) => {
+                const thumb = document.createElement("img");
+                thumb.src = imgUrl;
+                thumb.alt = `${name} thumbnail ${idx + 1}`;
+                thumb.className = "product-thumb" + (idx === 0 ? " active" : "");
+                thumb.addEventListener("click", () => {
+                    imageElement.src = imgUrl;
+                    thumbGallery.querySelectorAll(".product-thumb").forEach(t => t.classList.remove("active"));
+                    thumb.classList.add("active");
+                });
+                thumbGallery.appendChild(thumb);
+            });
+            thumbGallery.style.display = "flex";
+        } else {
+            thumbGallery.style.display = "none";
+        }
+    }
+
+    // Mobile sticky bar
+    const stickyPrice = document.getElementById("mobileStickyPrice");
+    if (stickyPrice) {
+        stickyPrice.textContent = "₹" + price;
+    }
+    const stickyBuyBtn = document.getElementById("stickyBuyBtn");
+    const stickyCartBtn = document.getElementById("stickyCartBtn");
+    if (stock <= 0) {
+        if (stickyBuyBtn) {
+            stickyBuyBtn.disabled = true;
+            stickyBuyBtn.textContent = "Out of Stock";
+        }
+        if (stickyCartBtn) {
+            stickyCartBtn.disabled = true;
+            stickyCartBtn.textContent = "Unavailable";
+        }
+    } else {
+        if (stickyBuyBtn) {
+            stickyBuyBtn.disabled = false;
+            stickyBuyBtn.textContent = "Buy Now";
+        }
+        if (stickyCartBtn) {
+            stickyCartBtn.disabled = false;
+            stickyCartBtn.textContent = "Add to Cart";
+        }
+    }
 
     updateProductWishlistButton();
+
+    // Trigger Analytics view_item
+    if (typeof window.trackAloraAnalyticsEvent === "function") {
+        window.trackAloraAnalyticsEvent("view_item", {
+            currency: "INR",
+            value: price,
+            items: [{
+                item_id: product.id || "",
+                item_name: name,
+                price: price,
+                item_category: product.category || "Jewellery"
+            }]
+        });
+    }
+
+    // Load related products & reviews
+    if (product.id) {
+        loadRelatedProducts(product.category, product.id);
+        loadProductReviews(product.id);
+    }
+}
+
+async function loadRelatedProducts(category, currentId) {
+    const container = document.getElementById("relatedProductsContainer");
+    const section = document.getElementById("relatedProductsSection");
+    if (!container) return;
+
+    try {
+        const modules = await getFirestoreModules();
+        const productsRef = modules.firestore.collection(modules.firebase.db, "products");
+        const snap = await modules.firestore.getDocs(productsRef);
+
+        const related = [];
+        const fallbacks = [];
+
+        snap.forEach(docSnap => {
+            if (docSnap.id === currentId) return;
+            const data = docSnap.data();
+            if (data.active === false) return;
+
+            const itemCategory = typeof window.determineProductCategory === "function"
+                ? window.determineProductCategory(data)
+                : (data.category || "Custom Jewellery");
+
+            const item = {
+                id: docSnap.id,
+                name: data.name || "Alora Jewellery",
+                price: Number(data.price) || 0,
+                image: data.image || "",
+                stock: Number(data.stock) || 0,
+                category: itemCategory,
+                badge: typeof window.determineProductBadge === "function" ? window.determineProductBadge(data) : null
+            };
+
+            if (category && itemCategory.toLowerCase() === category.toLowerCase()) {
+                related.push(item);
+            } else {
+                fallbacks.push(item);
+            }
+        });
+
+        const finalRelated = [...related, ...fallbacks].slice(0, 4);
+
+        if (finalRelated.length === 0) {
+            if (section) section.style.display = "none";
+            return;
+        }
+
+        if (section) section.style.display = "block";
+        container.innerHTML = "";
+
+        finalRelated.forEach(item => {
+            const card = document.createElement("article");
+            card.className = "card";
+            card.addEventListener("click", () => {
+                openProduct(item.name, item.price, item.image, item.stock, item.id);
+            });
+
+            const imgBox = document.createElement("div");
+            imgBox.className = "product-image";
+            if (item.badge) {
+                const b = document.createElement("span");
+                b.className = "product-card-badge " + item.badge.className;
+                b.textContent = item.badge.text;
+                imgBox.appendChild(b);
+            }
+            const img = document.createElement("img");
+            img.src = item.image;
+            img.alt = item.name;
+            img.loading = "lazy";
+            imgBox.appendChild(img);
+
+            const content = document.createElement("div");
+            content.className = "card-content";
+            const h3 = document.createElement("h3");
+            h3.textContent = item.name;
+            const priceP = document.createElement("p");
+            priceP.className = "product-price";
+            priceP.textContent = "₹" + item.price;
+
+            content.appendChild(h3);
+            content.appendChild(priceP);
+
+            card.appendChild(imgBox);
+            card.appendChild(content);
+            container.appendChild(card);
+        });
+
+    } catch (err) {
+        console.warn("Could not load related products:", err);
+        if (section) section.style.display = "none";
+    }
+}
+
+async function loadProductReviews(productId) {
+    const listEl = document.getElementById("productReviewsList");
+    const summaryEl = document.getElementById("productReviewsSummary");
+    const badgeEl = document.getElementById("productRatingBadge");
+    const starsEl = document.getElementById("productRatingStars");
+    const ratingTextEl = document.getElementById("productRatingText");
+    if (!listEl) return;
+
+    try {
+        const modules = await getFirestoreModules();
+        const reviewsRef = modules.firestore.collection(modules.firebase.db, "reviews");
+        const snap = await modules.firestore.getDocs(reviewsRef);
+
+        const reviews = [];
+        let totalStars = 0;
+
+        snap.forEach(docSnap => {
+            const rev = docSnap.data();
+            if (rev.productId === productId && rev.status === "approved") {
+                totalStars += Number(rev.rating) || 5;
+                reviews.push(rev);
+            }
+        });
+
+        if (reviews.length === 0) {
+            listEl.innerHTML = `<p style="color: var(--sub); font-size: 13.5px;">No reviews yet for this product. Be the first to share your experience!</p>`;
+            if (badgeEl) badgeEl.style.display = "none";
+            if (summaryEl) summaryEl.textContent = "";
+            return;
+        }
+
+        const avg = (totalStars / reviews.length).toFixed(1);
+        const roundedStars = Math.round(Number(avg));
+        const starStr = "★".repeat(roundedStars) + "☆".repeat(5 - roundedStars);
+
+        if (badgeEl) {
+            if (starsEl) starsEl.textContent = starStr;
+            if (ratingTextEl) ratingTextEl.textContent = `${avg} (${reviews.length} ${reviews.length === 1 ? 'review' : 'reviews'})`;
+            badgeEl.style.display = "inline-flex";
+        }
+
+        if (summaryEl) {
+            summaryEl.textContent = `${reviews.length} ${reviews.length === 1 ? 'Review' : 'Reviews'} • ${avg} / 5.0 Rating`;
+        }
+
+        listEl.innerHTML = "";
+        reviews.forEach(rev => {
+            const card = document.createElement("div");
+            card.className = "review-card";
+
+            const top = document.createElement("div");
+            top.className = "review-card-top";
+
+            const stars = document.createElement("span");
+            stars.className = "review-stars";
+            stars.textContent = "★".repeat(Number(rev.rating) || 5);
+
+            const date = document.createElement("span");
+            date.className = "review-date";
+            date.textContent = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }) : "";
+
+            top.appendChild(stars);
+            top.appendChild(date);
+
+            const name = document.createElement("div");
+            name.className = "review-customer-name";
+            name.textContent = (rev.customerName || "Verified Buyer") + " ✓";
+
+            const text = document.createElement("p");
+            text.className = "review-text";
+            text.style.cssText = "margin-top: 8px; font-size: 13.5px; color: var(--text); line-height: 1.6;";
+            text.textContent = rev.reviewText || "";
+
+            card.appendChild(top);
+            card.appendChild(name);
+            card.appendChild(text);
+
+            listEl.appendChild(card);
+        });
+
+    } catch (err) {
+        console.warn("Could not load product reviews:", err);
+    }
 }
 
 async function loadProductDetails() {
@@ -1074,10 +1335,13 @@ async function loadProductDetails() {
             name: legacyName,
             price: legacyPrice,
             image: legacyImage,
+            images: [legacyImage],
             stock: Number.isFinite(legacyStock)
                 ? legacyStock
                 : 0,
-            description: ""
+            description: "",
+            category: "Custom Jewellery",
+            badge: null
         };
         renderProductDetails(currentProduct);
         return;
@@ -1105,15 +1369,25 @@ async function loadProductDetails() {
         }
 
         const data = productSnapshot.data();
+        const category = typeof window.determineProductCategory === "function"
+            ? window.determineProductCategory(data)
+            : (data.category || "Custom Jewellery");
+        const badge = typeof window.determineProductBadge === "function"
+            ? window.determineProductBadge(data)
+            : null;
+
         currentProduct = {
             id: productSnapshot.id,
             name: data.name || "Alora Jewellery",
             price: Number(data.price) || 0,
             image: data.image || "",
+            images: Array.isArray(data.images) && data.images.length > 0 ? data.images : (data.image ? [data.image] : []),
             stock: Number.isFinite(Number(data.stock))
                 ? Number(data.stock)
                 : 0,
-            description: data.description || ""
+            description: data.description || "",
+            category: category,
+            badge: badge
         };
         renderProductDetails(currentProduct);
     } catch (error) {
@@ -3334,13 +3608,81 @@ const orderItems =
             );
         }
 
+        // Trigger purchase analytics event
+        if (typeof window.trackAloraAnalyticsEvent === "function") {
+            window.trackAloraAnalyticsEvent("purchase", {
+                transaction_id: orderId,
+                value: totalPrice,
+                currency: "INR",
+                payment_type: payment.value,
+                items: isCartCheckout ? cart.map(item => ({
+                    item_id: item.id || "",
+                    item_name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                })) : [{
+                    item_id: currentProduct ? (currentProduct.id || "") : "",
+                    item_name: productName.textContent,
+                    price: orderUnitPrice,
+                    quantity: Number(quantity) || 1
+                }]
+            });
+        }
 
-        /* RETURN HOME */
+        // Render On-Page Order Confirmation Card (Phase 15 & 16)
+        const orderCard = document.querySelector(".order-card");
+        let confirmationCard = document.getElementById("orderConfirmationCard");
 
-        setTimeout(function () {
-            window.location.href =
-                "index.html";
-        }, 1800);
+        if (orderCard && !confirmationCard) {
+            confirmationCard = document.createElement("div");
+            confirmationCard.id = "orderConfirmationCard";
+            confirmationCard.className = "order-confirmation-card";
+            orderCard.parentNode.insertBefore(confirmationCard, orderCard.nextSibling);
+        }
+
+        if (orderCard && confirmationCard) {
+            orderCard.style.display = "none";
+            const itemsSummary = isCartCheckout
+                ? cart.map(c => `${escapeHTML(c.name)} (x${c.quantity})`).join(", ")
+                : `${escapeHTML(productName.textContent)} (x${quantity || 1})`;
+
+            const waMsg = encodeURIComponent(
+                `Hi Alora, I just placed an order!\n\nOrder ID: ${orderId}\nTotal: ₹${totalPrice}\nItems: ${itemsSummary}\nPayment: ${payment.value}\n\nPlease confirm my order.`
+            );
+
+            confirmationCard.innerHTML = `
+                <div class="order-confirmation-icon">✓</div>
+                <h2>Order Placed Successfully!</h2>
+                <p style="color: var(--text); font-size: 14px;">Thank you for shopping with Alora Handmade Jewelry.</p>
+                <div class="order-id-badge">Order ID: #${orderId}</div>
+                <div class="order-confirmation-details">
+                    <p><strong>Customer:</strong> ${escapeHTML(customerName.value)}</p>
+                    <p><strong>Delivery Address:</strong> ${escapeHTML(address.value)}</p>
+                    <p><strong>Contact:</strong> ${escapeHTML(phone.value)} | ${escapeHTML(email.value)}</p>
+                    <p><strong>Items:</strong> ${itemsSummary}</p>
+                    <p><strong>Payment Method:</strong> ${escapeHTML(payment.value)}</p>
+                    <p><strong>Total Amount:</strong> ₹${totalPrice}</p>
+                    <p><strong>Estimated Delivery:</strong> 5–7 business days</p>
+                </div>
+                <div class="order-confirmation-actions">
+                    <a href="https://wa.me/919392159623?text=${waMsg}" target="_blank" rel="noopener" class="btn" style="background:#25D366; color:#fff; display:inline-flex; align-items:center; gap:8px;">
+                        <span>💬 Message on WhatsApp</span>
+                    </a>
+                    <a href="my-orders.html" class="btn" style="background:var(--gold); color:#fff;">
+                        📦 Track in My Orders
+                    </a>
+                    <a href="collections.html" class="btn" style="background:#faf8f5; color:var(--dark); border:1px solid var(--border);">
+                        Explore Collections
+                    </a>
+                </div>
+            `;
+            confirmationCard.style.display = "block";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+            setTimeout(function () {
+                window.location.href = "my-orders.html";
+            }, 1800);
+        }
 
 
     } catch (error) {
