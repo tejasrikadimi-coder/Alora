@@ -148,6 +148,22 @@
 <!-- ================= CATEGORY FILTERS & CONTROLS ================= -->
 
 <div class="collections-filter-bar">
+    <!-- MOBILE FILTER TOOLBAR (Compact Search/Filter/Sort for Mobile) -->
+    <div class="mobile-filter-toolbar" id="mobileFilterToolbar">
+        <button type="button" class="mobile-filter-btn" id="mobileFilterBtn" aria-label="Open filters" aria-haspopup="dialog" aria-controls="filterDrawer">
+            <span class="filter-icon">⚙</span> Filters
+            <span class="filter-count-badge" id="filterCountBadge" style="display: none;">0</span>
+        </button>
+        <div class="mobile-sort-wrapper">
+            <select id="mobileSortSelect" aria-label="Sort jewellery">
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+            </select>
+        </div>
+    </div>
+
     <div class="category-pills" id="categoryPills">
         <button type="button" class="category-pill active" data-category="All">All</button>
         <button type="button" class="category-pill" data-category="Earrings">Earrings</button>
@@ -276,6 +292,79 @@
         <p>© 2026 Alora Handmade Jewelry. Handcrafted with passion in India.</p>
     </div>
 </footer>
+
+<!-- ================= MOBILE FILTER DRAWER ================= -->
+<div class="filter-drawer-overlay" id="filterDrawerOverlay" aria-hidden="true">
+    <div class="filter-drawer" id="filterDrawer" role="dialog" aria-modal="true" aria-labelledby="filterDrawerTitle">
+        <div class="filter-drawer-header">
+            <h2 id="filterDrawerTitle">Filters &amp; Sort</h2>
+            <button type="button" class="filter-drawer-close" id="filterDrawerCloseBtn" aria-label="Close filters">&times;</button>
+        </div>
+        <div class="filter-drawer-body">
+            <!-- Categories -->
+            <div class="drawer-section">
+                <h3>Categories</h3>
+                <div class="drawer-category-chips" id="drawerCategoryChips">
+                    <button type="button" class="drawer-chip active" data-category="All">All</button>
+                    <button type="button" class="drawer-chip" data-category="Earrings">Earrings</button>
+                    <button type="button" class="drawer-chip" data-category="Necklaces">Necklaces</button>
+                    <button type="button" class="drawer-chip" data-category="Bangles">Bangles</button>
+                    <button type="button" class="drawer-chip" data-category="Hair Pins">Hair Pins</button>
+                    <button type="button" class="drawer-chip" data-category="Kids Jewellery">Kids Jewellery</button>
+                    <button type="button" class="drawer-chip" data-category="Rings">Rings</button>
+                    <button type="button" class="drawer-chip" data-category="Custom Jewellery">Custom Jewellery</button>
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="drawer-section">
+                <h3>Price Range (₹)</h3>
+                <div class="drawer-price-inputs">
+                    <input type="number" id="drawerMinPrice" placeholder="Min ₹" min="0" step="50" aria-label="Minimum price in rupees">
+                    <span class="price-sep">–</span>
+                    <input type="number" id="drawerMaxPrice" placeholder="Max ₹" min="0" step="50" aria-label="Maximum price in rupees">
+                </div>
+            </div>
+
+            <!-- Availability -->
+            <div class="drawer-section">
+                <h3>Availability</h3>
+                <label class="filter-checkbox-label">
+                    <input type="checkbox" id="drawerInStockFilter">
+                    <span>In Stock Only</span>
+                </label>
+            </div>
+
+            <!-- Sort By -->
+            <div class="drawer-section">
+                <h3>Sort By</h3>
+                <div class="drawer-sort-options">
+                    <label class="drawer-radio-label">
+                        <input type="radio" name="drawerSort" value="featured" checked>
+                        <span>Featured (Newest)</span>
+                    </label>
+                    <label class="drawer-radio-label">
+                        <input type="radio" name="drawerSort" value="price-low">
+                        <span>Price: Low to High</span>
+                    </label>
+                    <label class="drawer-radio-label">
+                        <input type="radio" name="drawerSort" value="price-high">
+                        <span>Price: High to Low</span>
+                    </label>
+                    <label class="drawer-radio-label">
+                        <input type="radio" name="drawerSort" value="name-asc">
+                        <span>Name: A to Z</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-drawer-footer">
+            <button type="button" id="drawerResetBtn" class="drawer-btn-reset">Reset All</button>
+            <button type="button" id="drawerApplyBtn" class="drawer-btn-apply">Apply Filters</button>
+        </div>
+    </div>
+</div>
 
 <script src="script.js"></script>
 <script type="module" src="products.js"></script>

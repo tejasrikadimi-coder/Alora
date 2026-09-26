@@ -2020,6 +2020,20 @@ function addToCart(
 
     saveCart(cart);
 
+    // Trigger Analytics add_to_cart event
+    if (typeof window.trackAloraAnalyticsEvent === "function") {
+        window.trackAloraAnalyticsEvent("add_to_cart", {
+            currency: "INR",
+            value: Number(price) * addedQuantity,
+            items: [{
+                item_id: id || "",
+                item_name: name,
+                price: Number(price),
+                quantity: addedQuantity
+            }]
+        });
+    }
+
     showCartMessage(name);
     renderCart();
 }
@@ -4246,8 +4260,32 @@ if (typeof window !== "undefined" && typeof window.addEventListener === "functio
 
 
 /* =====================================================
-   GOOGLE / FIREBASE ANALYTICS PAGE TRACKING
+   GOOGLE / FIREBASE ANALYTICS TRACKING
 ===================================================== */
+
+async function trackAloraAnalyticsEvent(eventName, eventParams = {}) {
+    try {
+        if (typeof window === "undefined" || !window.location) {
+            return;
+        }
+
+        const firebaseModule = await import("./firebase.js");
+        if (typeof firebaseModule.initAnalytics === "function") {
+            const analyticsInstance = await firebaseModule.initAnalytics();
+            if (analyticsInstance) {
+                const analyticsSdk = await import(
+                    "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js"
+                );
+                if (typeof analyticsSdk.logEvent === "function") {
+                    analyticsSdk.logEvent(analyticsInstance, eventName, eventParams);
+                }
+            }
+        }
+    } catch (error) {
+        // Safe silent fallback so analytics never disrupts storefront
+    }
+}
+window.trackAloraAnalyticsEvent = trackAloraAnalyticsEvent;
 
 async function trackPageView() {
     try {
@@ -4260,22 +4298,11 @@ async function trackPageView() {
             return;
         }
 
-        const firebaseModule = await import("./firebase.js");
-        if (typeof firebaseModule.initAnalytics === "function") {
-            const analyticsInstance = await firebaseModule.initAnalytics();
-            if (analyticsInstance) {
-                const analyticsSdk = await import(
-                    "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js"
-                );
-                if (typeof analyticsSdk.logEvent === "function") {
-                    analyticsSdk.logEvent(analyticsInstance, "page_view", {
-                        page_title: document.title || "Alora Handmade Jewelry",
-                        page_location: window.location.href,
-                        page_path: pathname
-                    });
-                }
-            }
-        }
+        await trackAloraAnalyticsEvent("page_view", {
+            page_title: document.title || "Alora Handmade Jewelry",
+            page_location: window.location.href,
+            page_path: pathname
+        });
     } catch (error) {
         // Safe silent fallback so analytics never disrupts storefront
     }

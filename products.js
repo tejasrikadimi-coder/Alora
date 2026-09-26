@@ -97,6 +97,23 @@ let currentMinPrice = null;
 let currentMaxPrice = null;
 let controlsInitialized = false;
 
+function updateFilterCountBadge() {
+    let count = 0;
+    if (currentCategory && currentCategory !== "All") count++;
+    if (currentMinPrice !== null || currentMaxPrice !== null) count++;
+    if (inStockOnly) count++;
+
+    const badge = document.getElementById("filterCountBadge");
+    if (badge) {
+        if (count > 0) {
+            badge.textContent = count;
+            badge.style.display = "inline-flex";
+        } else {
+            badge.style.display = "none";
+        }
+    }
+}
+
 function applyFiltersAndRender() {
     let result = [...allLoadedProducts];
 
@@ -137,6 +154,7 @@ function applyFiltersAndRender() {
         result.sort((a, b) => a.name.localeCompare(b.name));
     }
 
+    updateFilterCountBadge();
     renderProducts(result);
 }
 
@@ -266,6 +284,189 @@ function setupCollectionsControls() {
             });
         }
     });
+
+    // 7. Mobile Filter Toolbar & Drawer Controls
+    const mobileSortSelect = document.getElementById("mobileSortSelect");
+    if (mobileSortSelect) {
+        mobileSortSelect.value = currentSort;
+        mobileSortSelect.addEventListener("change", () => {
+            currentSort = mobileSortSelect.value;
+            if (sortSelect) sortSelect.value = currentSort;
+            applyFiltersAndRender();
+        });
+    }
+
+    if (sortSelect && mobileSortSelect) {
+        sortSelect.addEventListener("change", () => {
+            mobileSortSelect.value = sortSelect.value;
+        });
+    }
+
+    const mobileFilterBtn = document.getElementById("mobileFilterBtn");
+    const filterDrawerOverlay = document.getElementById("filterDrawerOverlay");
+    const filterDrawerCloseBtn = document.getElementById("filterDrawerCloseBtn");
+    const drawerApplyBtn = document.getElementById("drawerApplyBtn");
+    const drawerResetBtn = document.getElementById("drawerResetBtn");
+    const drawerMinPrice = document.getElementById("drawerMinPrice");
+    const drawerMaxPrice = document.getElementById("drawerMaxPrice");
+    const drawerInStockFilter = document.getElementById("drawerInStockFilter");
+    const drawerChips = document.querySelectorAll("#drawerCategoryChips .drawer-chip");
+    const drawerSortRadios = document.querySelectorAll('input[name="drawerSort"]');
+
+    let pendingDrawerCategory = currentCategory;
+
+    function openDrawer() {
+        if (!filterDrawerOverlay) return;
+        pendingDrawerCategory = currentCategory;
+        if (drawerMinPrice) drawerMinPrice.value = currentMinPrice !== null ? currentMinPrice : "";
+        if (drawerMaxPrice) drawerMaxPrice.value = currentMaxPrice !== null ? currentMaxPrice : "";
+        if (drawerInStockFilter) drawerInStockFilter.checked = inStockOnly;
+
+        drawerChips.forEach(chip => {
+            if (chip.dataset.category.toLowerCase() === currentCategory.toLowerCase()) {
+                chip.classList.add("active");
+            } else {
+                chip.classList.remove("active");
+            }
+        });
+
+        drawerSortRadios.forEach(radio => {
+            radio.checked = radio.value === currentSort;
+        });
+
+        filterDrawerOverlay.classList.add("open");
+        filterDrawerOverlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeDrawer() {
+        if (!filterDrawerOverlay) return;
+        filterDrawerOverlay.classList.remove("open");
+        filterDrawerOverlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    if (mobileFilterBtn) {
+        mobileFilterBtn.addEventListener("click", openDrawer);
+    }
+    if (filterDrawerCloseBtn) {
+        filterDrawerCloseBtn.addEventListener("click", closeDrawer);
+    }
+    if (filterDrawerOverlay) {
+        filterDrawerOverlay.addEventListener("click", (e) => {
+            if (e.target === filterDrawerOverlay) {
+                closeDrawer();
+            }
+        });
+    }
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && filterDrawerOverlay && filterDrawerOverlay.classList.contains("open")) {
+            closeDrawer();
+        }
+    });
+
+    drawerChips.forEach(chip => {
+        chip.addEventListener("click", () => {
+            drawerChips.forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+            pendingDrawerCategory = chip.dataset.category;
+        });
+    });
+
+    if (drawerApplyBtn) {
+        drawerApplyBtn.addEventListener("click", () => {
+            currentCategory = pendingDrawerCategory;
+
+            // Sync category pills
+            if (pillsContainer) {
+                const pills = pillsContainer.querySelectorAll(".category-pill");
+                pills.forEach(p => {
+                    if (p.dataset.category.toLowerCase() === currentCategory.toLowerCase()) {
+                        p.classList.add("active");
+                    } else {
+                        p.classList.remove("active");
+                    }
+                });
+            }
+
+            // Sync price
+            const rawMin = drawerMinPrice ? drawerMinPrice.value.trim() : "";
+            const rawMax = drawerMaxPrice ? drawerMaxPrice.value.trim() : "";
+            let minVal = rawMin !== "" ? Number(rawMin) : null;
+            let maxVal = rawMax !== "" ? Number(rawMax) : null;
+            if (minVal !== null && (isNaN(minVal) || minVal < 0)) minVal = null;
+            if (maxVal !== null && (isNaN(maxVal) || maxVal < 0)) maxVal = null;
+
+            if (minVal !== null && maxVal !== null && minVal > maxVal) {
+                const temp = minVal;
+                minVal = maxVal;
+                maxVal = temp;
+                if (drawerMinPrice) drawerMinPrice.value = minVal;
+                if (drawerMaxPrice) drawerMaxPrice.value = maxVal;
+            }
+            currentMinPrice = minVal;
+            currentMaxPrice = maxVal;
+            if (minPriceInput) minPriceInput.value = minVal !== null ? minVal : "";
+            if (maxPriceInput) maxPriceInput.value = maxVal !== null ? maxVal : "";
+
+            // Sync in stock
+            if (drawerInStockFilter) {
+                inStockOnly = drawerInStockFilter.checked;
+                if (inStockCheckbox) inStockCheckbox.checked = inStockOnly;
+            }
+
+            // Sync sort
+            const selectedSortRadio = document.querySelector('input[name="drawerSort"]:checked');
+            if (selectedSortRadio) {
+                currentSort = selectedSortRadio.value;
+                if (sortSelect) sortSelect.value = currentSort;
+                if (mobileSortSelect) mobileSortSelect.value = currentSort;
+            }
+
+            closeDrawer();
+            applyFiltersAndRender();
+        });
+    }
+
+    if (drawerResetBtn) {
+        drawerResetBtn.addEventListener("click", () => {
+            currentCategory = "All";
+            currentMinPrice = null;
+            currentMaxPrice = null;
+            inStockOnly = false;
+            currentSort = "featured";
+
+            // Sync drawer
+            pendingDrawerCategory = "All";
+            drawerChips.forEach(c => {
+                if (c.dataset.category === "All") c.classList.add("active");
+                else c.classList.remove("active");
+            });
+            if (drawerMinPrice) drawerMinPrice.value = "";
+            if (drawerMaxPrice) drawerMaxPrice.value = "";
+            if (drawerInStockFilter) drawerInStockFilter.checked = false;
+            drawerSortRadios.forEach(r => {
+                r.checked = r.value === "featured";
+            });
+
+            // Sync desktop controls
+            if (pillsContainer) {
+                const pills = pillsContainer.querySelectorAll(".category-pill");
+                pills.forEach(p => {
+                    if (p.dataset.category === "All") p.classList.add("active");
+                    else p.classList.remove("active");
+                });
+            }
+            if (minPriceInput) minPriceInput.value = "";
+            if (maxPriceInput) maxPriceInput.value = "";
+            if (inStockCheckbox) inStockCheckbox.checked = false;
+            if (sortSelect) sortSelect.value = "featured";
+            if (mobileSortSelect) mobileSortSelect.value = "featured";
+
+            closeDrawer();
+            applyFiltersAndRender();
+        });
+    }
 }
 
 

@@ -51,7 +51,10 @@ const firebaseConfig = {
         "282160785011",
 
     appId:
-        "1:282160785011:web:c24b3047635faef9d1ac06"
+        "1:282160785011:web:c24b3047635faef9d1ac06",
+
+    measurementId:
+        "G-4FDTV3W3Y6"
 };
 
 
