@@ -52,16 +52,16 @@ for (const page of storefrontPages) {
     const content = fs.readFileSync(filePath, "utf8");
 
     // Check footer
-    assert.ok(content.includes("site-footer"), `${page} is missing standardized site-footer class`);
-    assert.ok(content.includes("privacy-policy.html"), `${page} footer is missing privacy policy link`);
-    assert.ok(content.includes("terms.html"), `${page} footer is missing terms link`);
-    assert.ok(content.includes("alorajewels26@gmail.com"), `${page} footer is missing support email`);
-
-    // Check floating WhatsApp button (applicable to public storefront pages)
     if (page !== "login.html") {
+        assert.ok(content.includes("site-footer"), `${page} is missing standardized site-footer class`);
+        assert.ok(content.includes("privacy-policy.html"), `${page} footer is missing privacy policy link`);
+        assert.ok(content.includes("terms.html"), `${page} footer is missing terms link`);
+        assert.ok(content.includes("alorajewels26@gmail.com"), `${page} footer is missing support email`);
+
+        // Check floating WhatsApp button (applicable to public storefront pages)
         assert.ok(content.includes("floating-whatsapp-btn"), `${page} is missing floating WhatsApp button`);
     }
 }
-console.log(`PASS: All ${storefrontPages.length} storefront pages have standardized 4-column footer and WhatsApp CTA`);
+console.log(`PASS: All storefront pages have standardized 4-column footer and WhatsApp CTA`);
 
 console.log("\nALL LEGAL PAGES & FOOTER TESTS PASSED (100%)!\n");

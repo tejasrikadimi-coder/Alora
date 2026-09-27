@@ -501,6 +501,82 @@ async function sendCustomerOrderEmail({
   return response.json().catch(() => ({success: true}));
 }
 
+function formatOtpEmailHtml(otp) {
+  return [
+    "<!DOCTYPE html>",
+    "<html>",
+    "<head><meta charset=\"UTF-8\"></head>",
+    "<body style=\"margin: 0; padding: 24px; background-color: #faf7f2; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;\">",
+    "  <div style=\"max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e8dfd2; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06);\">",
+    "    <div style=\"background: #222222; padding: 28px 24px; text-align: center;\">",
+    "      <h1 style=\"margin: 0; color: #d4af37; font-size: 24px; letter-spacing: 3px; font-weight: 400; text-transform: uppercase;\">Alora</h1>",
+    "      <p style=\"margin: 6px 0 0; color: #c4b5a0; font-size: 11px; letter-spacing: 2px;\">HANDMADE JEWELRY</p>",
+    "    </div>",
+    "    <div style=\"padding: 36px 28px; text-align: center;\">",
+    "      <h2 style=\"margin: 0 0 12px; color: #222222; font-size: 20px; font-weight: 600;\">Your Verification Code</h2>",
+    "      <p style=\"margin: 0 0 24px; color: #666666; font-size: 14px; line-height: 1.5;\">Use the 6-digit security code below to complete your sign in to Alora Handmade Jewelry.</p>",
+    "      <div style=\"display: inline-block; background: #faf7f2; border: 1.5px dashed #d4af37; border-radius: 8px; padding: 16px 36px; margin: 0 auto 24px;\">",
+    `        <span style="font-family: 'Courier New', Courier, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #222222;">${escapeHtml(otp)}</span>`,
+    "      </div>",
+    "      <p style=\"margin: 0 0 8px; color: #888888; font-size: 13px;\">This code is valid for <strong>10 minutes</strong>. Do not share this code with anyone.</p>",
+    "      <p style=\"margin: 0; color: #aaa; font-size: 12px;\">If you didn't request this code, you can safely ignore this email.</p>",
+    "    </div>",
+    "    <div style=\"background: #faf7f2; border-top: 1px solid #e8dfd2; padding: 18px 24px; text-align: center;\">",
+    "      <p style=\"margin: 0; font-size: 12px; color: #888888;\">© 2026 Alora Handmade Jewelry · Palacole, India</p>",
+    "    </div>",
+    "  </div>",
+    "</body>",
+    "</html>",
+  ].join("\n");
+}
+
+async function sendCustomerEmail({
+  fetchImpl = fetch,
+  apiKey,
+  toEmail,
+  subject,
+  otp,
+  messageBody,
+}) {
+  const recipient = String(toEmail || "").trim();
+  if (!recipient || !recipient.includes("@")) {
+    throw new Error("Valid customer email address is required.");
+  }
+  const key = apiKey || process.env.RESEND_API_KEY;
+  if (!key) {
+    console.log(`[ALORA OTP] Notice: No RESEND_API_KEY, email logged for ${recipient}`);
+    return {success: true, simulated: true};
+  }
+
+  const endpoint = "https://api.resend.com/emails";
+  const fromAddress = "Alora Security <onboarding@resend.dev>";
+  const emailSubject = subject || `Your Alora Verification Code: ${otp}`;
+  const html = otp ? formatOtpEmailHtml(otp) : `<p>${escapeHtml(messageBody)}</p>`;
+  const text = messageBody || `Your Alora verification code is ${otp}. Valid for 10 minutes.`;
+
+  const response = await fetchImpl(endpoint, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromAddress,
+      to: [recipient],
+      subject: emailSubject,
+      text,
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => "");
+    throw new Error(`Resend customer email failed with status ${response.status}: ${errorBody}`);
+  }
+
+  return response.json().catch(() => ({success: true}));
+}
+
 module.exports = {
   ALORA_PRODUCTION_URL,
   buildAdminOrderUrl,
@@ -510,8 +586,11 @@ module.exports = {
   formatCustomerEmailSubject,
   formatCustomerEmailText,
   formatCustomerEmailHtml,
+  formatOtpEmailHtml,
   isEmailNotificationSent,
   isCustomerEmailNotificationSent,
   sendAdminOrderEmail,
   sendCustomerOrderEmail,
+  sendCustomerEmail,
 };
+

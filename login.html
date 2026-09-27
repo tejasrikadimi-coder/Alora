@@ -40,9 +40,7 @@
 
     <div class="auth-card">
 
-
-        <!-- LOGIN -->
-
+        <!-- 1. CUSTOMER LOGIN -->
         <section
             class="auth-form-section"
             id="loginSection">
@@ -52,16 +50,17 @@
             </div>
 
             <div class="auth-heading">
-
                 <p>WELCOME BACK</p>
-
                 <h1>Login</h1>
-
-                <span>
-                    Login to view your profile and orders.
-                </span>
-
+                <span>Sign in with your Google account to view your profile and orders.</span>
             </div>
+
+            <p
+                class="auth-message"
+                id="loginMessage"
+                role="status"
+                aria-live="polite">
+            </p>
 
             <button
                 type="button"
@@ -73,105 +72,21 @@
                     <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.97 0 12s.45 3.83 1.25 5.42l4.03-3.15z"/>
                     <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                 </svg>
-                <span>Continue with Google</span>
+                <span>Sign in with Google</span>
             </button>
 
-            <div class="auth-divider">
-                <span>OR</span>
-            </div>
-
-            <form id="loginForm">
-
-                <label for="loginEmail">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="loginEmail"
-                    placeholder="Enter your email"
-                    autocomplete="email"
-                    required>
-
-
-                <label for="loginPassword">
-                    Password
-                </label>
-
-                <div class="password-field">
-
-                    <input
-                        type="password"
-                        id="loginPassword"
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
-                        required>
-                    <button
-                        type="button"
-                        class="password-toggle"
-                        aria-label="Show password"
-                        onclick="togglePassword(
-                            'loginPassword',
-                            this
-                        )">
-                    </button>
-
-                </div>
-
-                <button
-                    type="button"
-                    id="forgotPasswordButton"
-                    class="forgot-password-button">
-                    Forgot Password?
-                </button>
-
-
-                <p
-                    class="auth-message"
-                    id="loginMessage"
-                    role="status"
-                    aria-live="polite">
-                </p>
-
-                <div id="resendVerificationContainer" style="display:none; text-align:center; margin-top:10px;">
-                    <button type="button" id="resendVerificationBtn" class="resend-verification-btn">Resend Verification Email</button>
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="auth-submit">
-                    Login
-                </button>
-
-                <p class="auth-agreement-text">
-                    By logging in, you agree to Alora's <a href="terms.html">Terms &amp; Conditions</a> and <a href="privacy-policy.html">Privacy Policy</a>.
-                </p>
-
-                <div class="auth-privacy-notice">
-                    <span>🔒 We respect your privacy. No spam, ever.</span>
-                </div>
-
-            </form>
-
-
             <p class="auth-switch">
-
                 Don't have an account?
-
                 <button
                     type="button"
                     onclick="showRegister()">
-                    Create Account
+                    Sign Up
                 </button>
-
             </p>
 
         </section>
 
-
-        <!-- REGISTER -->
-
+        <!-- 2. CUSTOMER SIGN UP -->
         <section
             class="auth-form-section"
             id="registerSection"
@@ -182,16 +97,17 @@
             </div>
 
             <div class="auth-heading">
-
                 <p>JOIN ALORA</p>
-
                 <h1>Create Account</h1>
-
-                <span>
-                    Register to manage your profile and orders.
-                </span>
-
+                <span>Create your account with Google to manage your profile and orders.</span>
             </div>
+
+            <p
+                class="auth-message"
+                id="registerMessage"
+                role="status"
+                aria-live="polite">
+            </p>
 
             <button
                 type="button"
@@ -206,200 +122,102 @@
                 <span>Sign up with Google</span>
             </button>
 
-            <div class="auth-divider">
-                <span>OR</span>
+            <div class="auth-consent-group">
+                <label for="registerTermsConsent" class="auth-consent-label">
+                    <input
+                        type="checkbox"
+                        id="registerTermsConsent"
+                        name="registerTermsConsent"
+                        class="auth-consent-checkbox">
+                    <span class="auth-consent-text">
+                        I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Terms &amp; Conditions</a> and <a href="privacy-policy.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Privacy Policy</a>.
+                    </span>
+                </label>
             </div>
 
-            <form id="registerForm">
-
-                <label for="registerName">
-                    Full Name
-                </label>
-
-                <input
-                    type="text"
-                    id="registerName"
-                    placeholder="Enter your full name"
-                    autocomplete="name"
-                    required>
-
-
-                <label for="registerEmail">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="registerEmail"
-                    placeholder="Enter your email"
-                    autocomplete="email"
-                    required>
-
-
-                <label for="registerPhone">
-                    Phone Number
-                </label>
-
-                <input
-                    type="tel"
-                    id="registerPhone"
-                    placeholder="Enter 10-digit phone number"
-                    autocomplete="tel"
-                    inputmode="numeric"
-                    required>
-
-
-                <label for="registerPassword">
-                    Password
-                </label>
-
-                <div class="password-field">
-
-                    <input
-                        type="password"
-                        id="registerPassword"
-                        placeholder="Minimum 6 characters"
-                        autocomplete="new-password"
-                        minlength="6"
-                        required>
-
-                    <button
-                        type="button"
-                        class="password-toggle"
-                        aria-label="Show password"
-                        onclick="togglePassword(
-                            'registerPassword',
-                            this
-                        )">
-                    </button>
-
-                </div>
-
-
-                <label for="confirmPassword">
-                    Confirm Password
-                </label>
-
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    placeholder="Enter password again"
-                    autocomplete="new-password"
-                    minlength="6"
-                    required>
-
-
-                <p
-                    class="auth-message"
-                    id="registerMessage">
-                </p>
-
-
-                <button
-                    type="submit"
-                    class="auth-submit">
-                    Create Account
-                </button>
-
-                <p class="auth-agreement-text">
-                    By creating an account, you agree to Alora's <a href="terms.html">Terms &amp; Conditions</a> and <a href="privacy-policy.html">Privacy Policy</a>.
-                </p>
-
-                <div class="auth-privacy-notice">
-                    <span>🔒 We respect your privacy. No spam, ever.</span>
-                </div>
-
-            </form>
-
+            <div class="auth-privacy-notice">
+                <span>🔒 Secure Google Sign-Up. Fast and passwordless.</span>
+            </div>
 
             <p class="auth-switch">
-
                 Already have an account?
-
                 <button
                     type="button"
                     onclick="showLogin()">
                     Login
                 </button>
-
             </p>
+        </section>
 
+        <!-- 4. STORE ADMINISTRATOR LOGIN (EMAIL + PASSWORD) -->
+        <section
+            class="auth-form-section"
+            id="adminLoginSection"
+            hidden>
+
+            <div class="auth-brand-badge">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Monogram" class="auth-logo-monogram">
+            </div>
+
+            <div class="auth-heading">
+                <p>ALORA MANAGEMENT</p>
+                <h1>Admin Portal</h1>
+                <span>Authorized store administrator access only.</span>
+            </div>
+
+            <form id="adminLoginForm" novalidate>
+                <label for="adminLoginEmail">Admin Email</label>
+                <input
+                    type="email"
+                    id="adminLoginEmail"
+                    value="alorajewels26@gmail.com"
+                    placeholder="alorajewels26@gmail.com"
+                    autocomplete="email"
+                    required>
+
+                <label for="adminLoginPassword">Admin Password</label>
+                <div class="password-field">
+                    <input
+                        type="password"
+                        id="adminLoginPassword"
+                        placeholder="Enter admin password"
+                        autocomplete="current-password"
+                        required>
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        aria-label="Show password"
+                        onclick="togglePassword('adminLoginPassword', this)">
+                    </button>
+                </div>
+
+                <p
+                    class="auth-message"
+                    id="adminLoginMessage"
+                    role="status"
+                    aria-live="polite">
+                </p>
+
+                <button
+                    type="submit"
+                    class="auth-submit"
+                    id="adminLoginSubmitBtn">
+                    Login to Dashboard
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                <button
+                    type="button"
+                    onclick="showLogin()">
+                    ← Back to Customer Login
+                </button>
+            </p>
         </section>
 
     </div>
 
 </main>
-
-
-<footer class="site-footer">
-    <div class="footer-container">
-        <div class="footer-col footer-brand-col">
-            <div class="footer-brand">
-                <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="footer-logo">
-                <span class="footer-brand-name">Alora</span>
-            </div>
-            <p class="footer-desc">
-                Handcrafted luxury jewelry made with elegance and love. Discover timeless designs crafted for every celebration.
-            </p>
-            <div class="footer-contact-item">
-                <span>📍</span>
-                <span>Palacole, India</span>
-            </div>
-            <div class="footer-contact-item">
-                <span>✉️</span>
-                <a href="mailto:alorajewels26@gmail.com">alorajewels26@gmail.com</a>
-            </div>
-            <div class="footer-contact-item">
-                <span>📞</span>
-                <a href="https://wa.me/919392159623" target="_blank" rel="noopener">+91 9392159623</a>
-            </div>
-        </div>
-
-        <div class="footer-col">
-            <h4 class="footer-heading">SHOP</h4>
-            <ul class="footer-links">
-                <li><a href="collections.html?category=Earrings">Earrings</a></li>
-                <li><a href="collections.html?category=Necklaces">Necklaces</a></li>
-                <li><a href="collections.html?category=Bangles">Bangles</a></li>
-                <li><a href="collections.html?category=Hair%20Pins">Hair Pins</a></li>
-                <li><a href="collections.html?category=Rings">Rings</a></li>
-                <li><a href="collections.html">All Collections</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4 class="footer-heading">HELP & SUPPORT</h4>
-            <ul class="footer-links">
-                <li><a href="contact.html">Contact Us</a></li>
-                <li><a href="faq.html">FAQ</a></li>
-                <li><a href="my-orders.html">Track Order</a></li>
-                <li><a href="terms.html#shipping">Shipping & Delivery</a></li>
-                <li><a href="terms.html#returns">Returns & Exchanges</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4 class="footer-heading">LEGAL & SOCIAL</h4>
-            <ul class="footer-links">
-                <li><a href="privacy-policy.html">Privacy Policy</a></li>
-                <li><a href="terms.html">Terms & Conditions</a></li>
-            </ul>
-            <h4 class="footer-heading" style="margin-top: 20px;">CONNECT</h4>
-            <div class="footer-social-links">
-                <a href="https://www.instagram.com/alor_ajewels/" target="_blank" rel="noopener" class="footer-social-btn" aria-label="Instagram">
-                    <span>📷 Instagram</span>
-                </a>
-                <a href="https://wa.me/919392159623" target="_blank" rel="noopener" class="footer-social-btn" aria-label="WhatsApp">
-                    <span>💬 WhatsApp</span>
-                </a>
-            </div>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p>© 2026 Alora Handmade Jewelry. Handcrafted with passion in India.</p>
-    </div>
-</footer>
-
 
 <script src="script.js"></script>
 

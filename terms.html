@@ -20,71 +20,10 @@
 </head>
 
 <body>
-<header class="site-header">
-
-    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+<header class="site-header" style="justify-content: center;">
+    <div class="logo" style="cursor: default;" aria-label="Alora Handmade Jewelry">
         <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
         <span class="logo-text">Alora</span>
-    </a>
-
-    <!-- MOBILE MENU -->
-    <button
-        type="button"
-        class="menu-toggle"
-        onclick="toggleMenu()"
-        aria-label="Open navigation menu">
-        ☰
-    </button>
-
-    <!-- MAIN NAVIGATION -->
-    <nav id="navMenu">
-        <a href="index.html">Home</a>
-        <a href="collections.html">Collections</a>
-        <a href="about.html">About</a>
-        <a href="contact.html">Contact</a>
-    </nav>
-
-    <!-- RIGHT-SIDE ACTIONS -->
-    <div class="header-actions">
-
-        <a
-            href="wishlist.html"
-            class="header-icon-link"
-            aria-label="Wishlist">
-            <span class="header-icon">♡</span>
-            <span
-                class="header-count"
-                id="wishlistCountBadge">
-            </span>
-        </a>
-
-        <a
-            href="cart.html"
-            class="header-icon-link"
-            aria-label="Cart">
-            <span class="header-icon cart-symbol">🛒</span>
-            <span
-                class="header-count"
-                id="cartCountBadge">
-            </span>
-        </a>
-
-        <!-- ACCOUNT -->
-        <div class="account-menu">
-            <button
-                type="button"
-                class="account-button"
-                onclick="toggleAccountMenu(event)"
-                aria-label="Account">
-                👤
-            </button>
-            <div
-                class="account-dropdown"
-                id="accountDropdown">
-                <a href="profile.html">👤 My Profile</a>
-                <a href="my-orders.html">📦 My Orders</a>
-            </div>
-        </div>
     </div>
 </header>
 
@@ -101,7 +40,7 @@
         <section class="legal-section">
             <h2>1. Acceptance of Terms</h2>
             <p>
-                By accessing or using the <strong>Alora Handmade Jewelry</strong> website (<a href="https://alora-handmade-jewelry.web.app">alora-handmade-jewelry.web.app</a>), registering an account, or placing an order, you agree to be bound by these Terms and Conditions and our <a href="privacy-policy.html">Privacy Policy</a>. If you do not agree with any part of these terms, please do not use our website.
+                By accessing or using the <strong>Alora Handmade Jewelry</strong> website (alora-handmade-jewelry.web.app), registering an account, or placing an order, you agree to be bound by these Terms and Conditions and our <a href="privacy-policy.html">Privacy Policy</a>. If you do not agree with any part of these terms, please do not use our website.
             </p>
         </section>
 
@@ -139,14 +78,14 @@
             <ul>
                 <li><strong>Dispatch Timeline:</strong> In-stock handcrafted items are carefully packaged and dispatched within <strong>2 to 3 business days</strong> after order confirmation and payment verification.</li>
                 <li><strong>Delivery Timeline:</strong> Standard courier delivery typically takes <strong>5 to 7 business days</strong> across India, depending on destination pincode and regional logistics.</li>
-                <li><strong>Tracking:</strong> You can track your order status live in your <a href="my-orders.html">My Orders</a> dashboard.</li>
+                <li><strong>Tracking:</strong> You can track your order status live in your <strong>My Orders</strong> dashboard.</li>
             </ul>
         </section>
 
         <section class="legal-section" id="cancellations">
             <h2>6. Order Cancellations</h2>
             <p>
-                You may request cancellation of an order through your <a href="my-orders.html">My Orders</a> dashboard while the status is still <strong>Order Received</strong> or <strong>Confirmed</strong>. Once an order enters <strong>Processing</strong> or has been <strong>Shipped</strong>, cancellation is no longer possible as the parcel has been assigned to our logistics partner.
+                You may request cancellation of an order through your <strong>My Orders</strong> dashboard while the status is still <strong>Order Received</strong> or <strong>Confirmed</strong>. Once an order enters <strong>Processing</strong> or has been <strong>Shipped</strong>, cancellation is no longer possible as the parcel has been assigned to our logistics partner.
             </p>
         </section>
 
@@ -196,79 +135,30 @@
     </div>
 </main>
 
-<!-- FLOATING WHATSAPP CTA -->
-<a href="https://wa.me/919392159623?text=Hi%20Alora%2C%20I%20have%20an%20inquiry%20about%20your%20jewellery" target="_blank" rel="noopener" class="floating-whatsapp-btn" aria-label="Chat with Alora on WhatsApp">
-    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
-        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.592 2.654-.696c1.004.577 1.83.844 2.806.845h.005c3.18 0 5.767-2.587 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zm9.969 5.828c0 5.523-4.477 10-10 10-1.74 0-3.37-.444-4.805-1.222L2 22l1.246-5.069A9.957 9.957 0 012 12c0-5.523 4.477-10 10-10s10 4.477 10 10z"/>
-    </svg>
-</a>
+<!-- Storefront CTA disabled for standalone legal document: floating-whatsapp-btn -->
 
 <footer class="site-footer">
-    <div class="footer-container">
-        <div class="footer-col footer-brand-col">
-            <div class="footer-brand">
+    <div class="footer-container" style="justify-content: center; text-align: center;">
+        <div class="footer-col" style="max-width: 600px; margin: 0 auto; text-align: center;">
+            <div class="footer-brand" style="justify-content: center;">
                 <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="footer-logo">
                 <span class="footer-brand-name">Alora</span>
             </div>
-            <p class="footer-desc">
-                Handcrafted luxury jewelry made with elegance and love. Discover timeless designs crafted for every celebration.
+            <p class="footer-desc" style="text-align: center; margin: 12px 0;">
+                Handcrafted luxury jewelry made with elegance and love. Official Legal Documentation.
             </p>
-            <div class="footer-contact-item">
-                <span>📍</span>
-                <span>Hyderabad, India</span>
+            <div style="margin: 16px 0; display: flex; justify-content: center; gap: 20px;">
+                <a href="terms.html" style="color: var(--gold); text-decoration: underline;">Terms &amp; Conditions</a>
+                <span style="color: var(--text-muted);">|</span>
+                <a href="privacy-policy.html" style="color: var(--gold); text-decoration: underline;">Privacy Policy</a>
             </div>
-            <div class="footer-contact-item">
-                <span>✉️</span>
-                <a href="mailto:alorajewels26@gmail.com">alorajewels26@gmail.com</a>
-            </div>
-            <div class="footer-contact-item">
-                <span>📞</span>
-                <a href="https://wa.me/919392159623" target="_blank" rel="noopener">+91 9392159623</a>
-            </div>
-        </div>
-
-        <div class="footer-col">
-            <h4 class="footer-heading">SHOP</h4>
-            <ul class="footer-links">
-                <li><a href="collections.html?category=Earrings">Earrings</a></li>
-                <li><a href="collections.html?category=Necklaces">Necklaces</a></li>
-                <li><a href="collections.html?category=Bangles">Bangles</a></li>
-                <li><a href="collections.html?category=Hair%20Pins">Hair Pins</a></li>
-                <li><a href="collections.html?category=Rings">Rings</a></li>
-                <li><a href="collections.html">All Collections</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4 class="footer-heading">HELP & SUPPORT</h4>
-            <ul class="footer-links">
-                <li><a href="contact.html">Contact Us</a></li>
-                <li><a href="faq.html">FAQ</a></li>
-                <li><a href="my-orders.html">Track Order</a></li>
-                <li><a href="terms.html#shipping">Shipping & Delivery</a></li>
-                <li><a href="terms.html#returns">Returns & Exchanges</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4 class="footer-heading">LEGAL & SOCIAL</h4>
-            <ul class="footer-links">
-                <li><a href="privacy-policy.html">Privacy Policy</a></li>
-                <li><a href="terms.html">Terms & Conditions</a></li>
-            </ul>
-            <h4 class="footer-heading" style="margin-top: 20px;">CONNECT</h4>
-            <div class="footer-social-links">
-                <a href="https://www.instagram.com/alor_ajewels/" target="_blank" rel="noopener" class="footer-social-btn" aria-label="Instagram">
-                    <span>📷 Instagram</span>
-                </a>
-                <a href="https://wa.me/919392159623" target="_blank" rel="noopener" class="footer-social-btn" aria-label="WhatsApp">
-                    <span>💬 WhatsApp</span>
-                </a>
-            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 10px;">
+                Support: <a href="mailto:alorajewels26@gmail.com" style="color: inherit;">alorajewels26@gmail.com</a> | <a href="https://wa.me/919392159623" target="_blank" rel="noopener" style="color: inherit;">+91 9392159623</a>
+            </p>
         </div>
     </div>
     <div class="footer-bottom">
-        <p>© 2026 Alora Handmade Jewelry. Handcrafted with passion in India.</p>
+        <p>© 2026 Alora Handmade Jewelry. Handcrafted with passion in India. All rights reserved.</p>
     </div>
 </footer>
 
