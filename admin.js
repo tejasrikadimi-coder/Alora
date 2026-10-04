@@ -1184,18 +1184,20 @@ function createAdminOrderCard(order) {
 
                 <span>PRODUCTS</span>
 
-                <strong>
-                    ${escapeHTML(
-                        data.products || ""
-                    )}
-                </strong>
-
-                <small>
-                    Quantity:
-                    ${Number(
-                        data.quantity
-                    ) || 1}
-                </small>
+                ${Array.isArray(data.items) && data.items.length > 0
+                    ? data.items.map(item => `
+                        <div class="admin-order-item-row" style="margin-bottom: 6px;">
+                            <strong>${escapeHTML(item.name || "")}</strong>
+                            ${item.selectedColor ? `<span class="admin-order-item-color" style="display:block; color: #b68b00; font-weight: 600; font-size: 12px;">Color: ${escapeHTML(item.selectedColor)}</span>` : ""}
+                            <small>Quantity: ${Number(item.quantity) || 1}${item.price ? ` • Price: ₹${item.price}` : ""}</small>
+                        </div>
+                    `).join("")
+                    : `
+                        <strong>${escapeHTML(data.products || "")}</strong>
+                        ${data.selectedColor ? `<span class="admin-order-item-color" style="display:block; color: #b68b00; font-weight: 600; font-size: 12px;">Color: ${escapeHTML(data.selectedColor)}</span>` : ""}
+                        <small>Quantity: ${Number(data.quantity) || 1}</small>
+                    `
+                }
 
             </div>
 
@@ -2784,6 +2786,548 @@ if (
 
 
 /* =====================================================
+   PRODUCT AVAILABLE COLORS CONTROLLER (ADMIN)
+===================================================== */
+
+const PREDEFINED_JEWELRY_COLORS = [
+    "Gold",
+    "Silver",
+    "Rose Gold",
+    "White",
+    "Black",
+    "Red",
+    "Blue",
+    "Green",
+    "Purple",
+    "Pink",
+    "Maroon",
+    "Multicolor"
+];
+
+function getAdminColorBackground(colorName) {
+    if (!colorName || typeof colorName !== "string") {
+        return "linear-gradient(135deg, #f5d77f, #d4af37)";
+    }
+    const normalized = colorName.trim().toLowerCase();
+    switch (normalized) {
+        case "gold":
+            return "linear-gradient(135deg, #f5d77f, #d4af37)";
+        case "silver":
+            return "linear-gradient(135deg, #f0f0f0, #c0c0c0)";
+        case "rose gold":
+            return "linear-gradient(135deg, #fad0c4, #b76e79)";
+        case "white":
+            return "#ffffff";
+        case "black":
+            return "#1a1a1a";
+        case "red":
+            return "#d32f2f";
+        case "blue":
+            return "#1976d2";
+        case "green":
+            return "#2e7d32";
+        case "purple":
+            return "#7b1fa2";
+        case "pink":
+            return "#e91e63";
+        case "maroon":
+            return "#800000";
+        case "multicolor":
+            return "linear-gradient(135deg, #e91e63, #ff9800, #4caf50, #2196f3)";
+        case "yellow":
+            return "#fbc02d";
+        case "orange":
+            return "#fb8c00";
+        case "brown":
+            return "#795548";
+        case "grey":
+        case "gray":
+            return "#9e9e9e";
+        case "copper":
+            return "#b87333";
+        case "bronze":
+            return "#cd7f32";
+        case "wine":
+            return "#722f37";
+        case "teal":
+            return "#00897b";
+        case "turquoise":
+            return "#40e0d0";
+        case "lavender":
+            return "#b39ddb";
+        case "peach":
+            return "#ffccbc";
+        case "coral":
+            return "#ff7043";
+        default:
+            return "linear-gradient(135deg, #e0d0b0, #b68b00)";
+    }
+}
+
+const adminColorsState = {
+    add: {
+        customColors: [],
+        imageDisplayMode: "single",
+        colorImages: {}
+    },
+    edit: {
+        customColors: [],
+        imageDisplayMode: "single",
+        colorImages: {}
+    }
+};
+
+function getAdminColorElementPrefix(type) {
+    return type === "edit" ? "adminEditProduct" : "adminProduct";
+}
+
+function getImageDisplayMode(type) {
+    const prefix = getAdminColorElementPrefix(type);
+    const carouselRadio = document.getElementById(prefix + "ImageModeCarousel");
+    if (carouselRadio && carouselRadio.checked) {
+        return "colorCarousel";
+    }
+    return "single";
+}
+
+function setImageDisplayMode(type, mode) {
+    const prefix = getAdminColorElementPrefix(type);
+    const singleRadio = document.getElementById(prefix + "ImageModeSingle");
+    const carouselRadio = document.getElementById(prefix + "ImageModeCarousel");
+    const section = document.getElementById(prefix + "ColorImagesSection");
+
+    const isCarousel = (mode === "colorCarousel");
+    if (adminColorsState[type]) {
+        adminColorsState[type].imageDisplayMode = isCarousel ? "colorCarousel" : "single";
+    }
+
+    if (singleRadio) singleRadio.checked = !isCarousel;
+    if (carouselRadio) carouselRadio.checked = isCarousel;
+
+    if (section) {
+        section.style.display = isCarousel ? "block" : "none";
+    }
+
+    if (isCarousel) {
+        renderAdminColorImagesList(type);
+    }
+}
+
+function updateAdminSelectedColorsPreview(type) {
+    const prefix = getAdminColorElementPrefix(type);
+    const summaryEl = document.getElementById(prefix + "SelectedColorsText");
+    const gridEl = document.getElementById(prefix + "ColorOptions");
+    const toggleEl = document.getElementById(prefix + "HasColors");
+
+    if (!summaryEl) return;
+
+    if (!toggleEl || !toggleEl.checked) {
+        summaryEl.textContent = "None";
+        renderAdminColorImagesList(type);
+        return;
+    }
+
+    if (!gridEl) {
+        summaryEl.textContent = "None";
+        renderAdminColorImagesList(type);
+        return;
+    }
+
+    const checkedBoxes = Array.from(gridEl.querySelectorAll("input.admin-color-checkbox:checked"));
+    const selectedNames = checkedBoxes.map(cb => cb.value.trim()).filter(Boolean);
+
+    summaryEl.textContent = selectedNames.length > 0 ? selectedNames.join(" • ") : "None";
+    renderAdminColorImagesList(type);
+}
+
+function renderAdminColorImagesList(type) {
+    const prefix = getAdminColorElementPrefix(type);
+    const listEl = document.getElementById(prefix + "ColorImagesList");
+    const sectionEl = document.getElementById(prefix + "ColorImagesSection");
+    if (!listEl) return;
+
+    const mode = getImageDisplayMode(type);
+    if (mode !== "colorCarousel") {
+        if (sectionEl) sectionEl.style.display = "none";
+        return;
+    }
+
+    if (sectionEl) sectionEl.style.display = "block";
+
+    const selectedColors = getSelectedProductColors(type);
+    if (!adminColorsState[type]) {
+        adminColorsState[type] = { customColors: [], imageDisplayMode: "colorCarousel", colorImages: {} };
+    }
+    if (!adminColorsState[type].colorImages) {
+        adminColorsState[type].colorImages = {};
+    }
+
+    listEl.innerHTML = "";
+
+    if (selectedColors.length === 0) {
+        const emptyMsg = document.createElement("p");
+        emptyMsg.className = "admin-color-image-status";
+        emptyMsg.textContent = "Please select at least one available color above to assign images.";
+        listEl.appendChild(emptyMsg);
+        return;
+    }
+
+    selectedColors.forEach(colorName => {
+        const row = document.createElement("div");
+        row.className = "admin-color-image-row";
+        row.setAttribute("data-color", colorName);
+
+        const currentUrl = adminColorsState[type].colorImages[colorName] || "";
+
+        // Swatch dot + Color Name
+        const infoDiv = document.createElement("div");
+        infoDiv.className = "admin-color-image-row-info";
+        const dot = document.createElement("span");
+        dot.className = "admin-color-swatch-dot";
+        dot.style.background = getAdminColorBackground(colorName);
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = colorName;
+        infoDiv.appendChild(dot);
+        infoDiv.appendChild(nameSpan);
+
+        // Preview image or placeholder
+        const previewImg = document.createElement("img");
+        previewImg.className = "admin-color-image-preview-thumb";
+        previewImg.alt = colorName + " image preview";
+        if (currentUrl) {
+            previewImg.src = currentUrl;
+            previewImg.style.display = "block";
+        } else {
+            previewImg.src = "";
+            previewImg.style.display = "none";
+        }
+
+        const placeholder = document.createElement("div");
+        placeholder.className = "admin-color-image-preview-placeholder";
+        placeholder.textContent = "No img";
+        placeholder.style.display = currentUrl ? "none" : "flex";
+
+        // Controls: file upload, URL input, remove button, status
+        const controlsDiv = document.createElement("div");
+        controlsDiv.className = "admin-color-image-row-controls";
+
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+        fileInput.className = "admin-color-image-file-input";
+
+        const urlInput = document.createElement("input");
+        urlInput.type = "url";
+        urlInput.placeholder = "https://res.cloudinary.com/...";
+        urlInput.className = "admin-color-image-url-input";
+        urlInput.value = currentUrl;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "admin-color-image-remove-btn";
+        removeBtn.textContent = "Remove";
+
+        const statusSpan = document.createElement("span");
+        statusSpan.className = "admin-color-image-status";
+
+        // File upload event
+        fileInput.addEventListener("change", async function (e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const validation = validateProductImageFile(file);
+            if (!validation.valid) {
+                statusSpan.textContent = "Error: " + validation.error;
+                statusSpan.style.color = "#d32f2f";
+                fileInput.value = "";
+                return;
+            }
+
+            try {
+                statusSpan.textContent = "Uploading to Cloudinary...";
+                statusSpan.style.color = "#b68b00";
+                const uploadResult = await uploadProductImageToCloudinary(file, function (txt) {
+                    statusSpan.textContent = txt;
+                });
+
+                const secureUrl = uploadResult && (uploadResult.secure_url || uploadResult.url);
+                if (!secureUrl || typeof secureUrl !== "string" || !/^https?:\/\//i.test(secureUrl)) {
+                    throw new Error("Invalid Cloudinary upload response.");
+                }
+
+                adminColorsState[type].colorImages[colorName] = secureUrl;
+                urlInput.value = secureUrl;
+                previewImg.src = secureUrl;
+                previewImg.style.display = "block";
+                placeholder.style.display = "none";
+                statusSpan.textContent = "✓ Uploaded";
+                statusSpan.style.color = "#2e7d32";
+            } catch (err) {
+                statusSpan.textContent = "Upload failed: " + (err.message || "Network error");
+                statusSpan.style.color = "#d32f2f";
+            }
+        });
+
+        // URL input event
+        urlInput.addEventListener("change", function () {
+            const val = urlInput.value.trim();
+            if (!val) {
+                delete adminColorsState[type].colorImages[colorName];
+                previewImg.src = "";
+                previewImg.style.display = "none";
+                placeholder.style.display = "flex";
+                statusSpan.textContent = "";
+                return;
+            }
+
+            if (val.startsWith("images/") || !/^https?:\/\//i.test(val)) {
+                statusSpan.textContent = "Error: Only secure web URLs (https://...) are allowed.";
+                statusSpan.style.color = "#d32f2f";
+                return;
+            }
+
+            adminColorsState[type].colorImages[colorName] = val;
+            previewImg.src = val;
+            previewImg.style.display = "block";
+            placeholder.style.display = "none";
+            statusSpan.textContent = "✓ Set";
+            statusSpan.style.color = "#2e7d32";
+        });
+
+        // Remove button
+        removeBtn.addEventListener("click", function () {
+            delete adminColorsState[type].colorImages[colorName];
+            fileInput.value = "";
+            urlInput.value = "";
+            previewImg.src = "";
+            previewImg.style.display = "none";
+            placeholder.style.display = "flex";
+            statusSpan.textContent = "Cleared";
+            statusSpan.style.color = "#888";
+        });
+
+        controlsDiv.appendChild(fileInput);
+        controlsDiv.appendChild(urlInput);
+        controlsDiv.appendChild(placeholder);
+        controlsDiv.appendChild(previewImg);
+        controlsDiv.appendChild(removeBtn);
+        controlsDiv.appendChild(statusSpan);
+
+        row.appendChild(infoDiv);
+        row.appendChild(controlsDiv);
+        listEl.appendChild(row);
+    });
+}
+
+function renderAdminColorOptions(type, selectedColors = []) {
+    const prefix = getAdminColorElementPrefix(type);
+    const gridEl = document.getElementById(prefix + "ColorOptions");
+    if (!gridEl) return;
+
+    const normalizedSelected = Array.isArray(selectedColors)
+        ? selectedColors.map(c => String(c).trim().toLowerCase())
+        : [];
+
+    const options = [...PREDEFINED_JEWELRY_COLORS];
+    const customList = (adminColorsState[type] && adminColorsState[type].customColors) || [];
+    customList.forEach(c => {
+        if (!options.some(opt => opt.toLowerCase() === c.toLowerCase())) {
+            options.push(c);
+        }
+    });
+
+    gridEl.innerHTML = "";
+
+    options.forEach(colorName => {
+        const isSelected = normalizedSelected.includes(colorName.toLowerCase());
+
+        const label = document.createElement("label");
+        label.className = "admin-color-option-label" + (isSelected ? " checked" : "");
+        label.setAttribute("data-color", colorName);
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "admin-color-checkbox";
+        checkbox.value = colorName;
+        checkbox.checked = isSelected;
+
+        const dot = document.createElement("span");
+        dot.className = "admin-color-swatch-dot";
+        dot.style.background = getAdminColorBackground(colorName);
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "admin-color-name";
+        nameSpan.textContent = colorName;
+
+        checkbox.addEventListener("change", function () {
+            if (checkbox.checked) {
+                label.classList.add("checked");
+            } else {
+                label.classList.remove("checked");
+            }
+            updateAdminSelectedColorsPreview(type);
+        });
+
+        label.appendChild(checkbox);
+        label.appendChild(dot);
+        label.appendChild(nameSpan);
+        gridEl.appendChild(label);
+    });
+
+    updateAdminSelectedColorsPreview(type);
+}
+
+function getSelectedProductColors(type) {
+    const prefix = getAdminColorElementPrefix(type);
+    const toggleEl = document.getElementById(prefix + "HasColors");
+    if (!toggleEl || !toggleEl.checked) {
+        return [];
+    }
+
+    const gridEl = document.getElementById(prefix + "ColorOptions");
+    if (!gridEl) return [];
+
+    const checkedBoxes = Array.from(gridEl.querySelectorAll("input.admin-color-checkbox:checked"));
+    const selected = checkedBoxes.map(cb => cb.value.trim()).filter(Boolean);
+    return selected.filter((item, idx, arr) =>
+        arr.findIndex(x => x.toLowerCase() === item.toLowerCase()) === idx
+    );
+}
+
+function addAdminCustomColor(type) {
+    const prefix = getAdminColorElementPrefix(type);
+    const inputEl = document.getElementById(prefix + "CustomColorInput");
+    const gridEl = document.getElementById(prefix + "ColorOptions");
+    if (!inputEl) return;
+
+    const rawVal = inputEl.value.trim();
+    if (!rawVal) return;
+
+    const formattedColor = rawVal
+        .split(/\s+/)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
+    if (!adminColorsState[type]) {
+        adminColorsState[type] = { customColors: [], imageDisplayMode: "single", colorImages: {} };
+    }
+
+    const existingCheckbox = gridEl
+        ? gridEl.querySelector(`input.admin-color-checkbox[value="${formattedColor}" i]`)
+        : null;
+
+    if (existingCheckbox) {
+        existingCheckbox.checked = true;
+        const parentLabel = existingCheckbox.closest(".admin-color-option-label");
+        if (parentLabel) parentLabel.classList.add("checked");
+        updateAdminSelectedColorsPreview(type);
+        inputEl.value = "";
+        return;
+    }
+
+    adminColorsState[type].customColors.push(formattedColor);
+
+    const currentlySelected = getSelectedProductColors(type);
+    if (!currentlySelected.some(c => c.toLowerCase() === formattedColor.toLowerCase())) {
+        currentlySelected.push(formattedColor);
+    }
+
+    renderAdminColorOptions(type, currentlySelected);
+    inputEl.value = "";
+}
+
+function setAdminColors(type, colorsArray, imageDisplayMode = "single", colorImages = {}) {
+    const prefix = getAdminColorElementPrefix(type);
+    const toggleEl = document.getElementById(prefix + "HasColors");
+    const bodyEl = document.getElementById(prefix + "ColorsBody");
+    const inputEl = document.getElementById(prefix + "CustomColorInput");
+
+    if (inputEl) inputEl.value = "";
+
+    const normalizedColors = Array.isArray(colorsArray)
+        ? colorsArray.filter(c => typeof c === "string" && c.trim()).map(c => c.trim())
+        : [];
+
+    if (!adminColorsState[type]) {
+        adminColorsState[type] = { customColors: [], imageDisplayMode: "single", colorImages: {} };
+    }
+    adminColorsState[type].colorImages = (colorImages && typeof colorImages === "object") ? { ...colorImages } : {};
+
+    if (normalizedColors.length > 0) {
+        if (toggleEl) toggleEl.checked = true;
+        if (bodyEl) bodyEl.style.display = "block";
+
+        normalizedColors.forEach(c => {
+            if (!PREDEFINED_JEWELRY_COLORS.some(p => p.toLowerCase() === c.toLowerCase())) {
+                if (!adminColorsState[type].customColors.some(existing => existing.toLowerCase() === c.toLowerCase())) {
+                    adminColorsState[type].customColors.push(c);
+                }
+            }
+        });
+
+        renderAdminColorOptions(type, normalizedColors);
+        setImageDisplayMode(type, imageDisplayMode || "single");
+    } else {
+        if (toggleEl) toggleEl.checked = false;
+        if (bodyEl) bodyEl.style.display = "none";
+        adminColorsState[type].customColors = [];
+        renderAdminColorOptions(type, []);
+        setImageDisplayMode(type, "single");
+    }
+}
+
+function resetAdminColors(type) {
+    setAdminColors(type, [], "single", {});
+}
+
+function initAdminColors(type) {
+    const prefix = getAdminColorElementPrefix(type);
+    const toggleEl = document.getElementById(prefix + "HasColors");
+    const bodyEl = document.getElementById(prefix + "ColorsBody");
+    const addCustomBtn = document.getElementById(prefix + "AddCustomColorBtn");
+    const customInputEl = document.getElementById(prefix + "CustomColorInput");
+    const singleRadio = document.getElementById(prefix + "ImageModeSingle");
+    const carouselRadio = document.getElementById(prefix + "ImageModeCarousel");
+
+    if (toggleEl && bodyEl) {
+        toggleEl.addEventListener("change", function () {
+            bodyEl.style.display = toggleEl.checked ? "block" : "none";
+            updateAdminSelectedColorsPreview(type);
+        });
+    }
+
+    if (singleRadio) {
+        singleRadio.addEventListener("change", function () {
+            if (singleRadio.checked) setImageDisplayMode(type, "single");
+        });
+    }
+
+    if (carouselRadio) {
+        carouselRadio.addEventListener("change", function () {
+            if (carouselRadio.checked) setImageDisplayMode(type, "colorCarousel");
+        });
+    }
+
+    if (addCustomBtn) {
+        addCustomBtn.addEventListener("click", function () {
+            addAdminCustomColor(type);
+        });
+    }
+
+    if (customInputEl) {
+        customInputEl.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addAdminCustomColor(type);
+            }
+        });
+    }
+
+    renderAdminColorOptions(type, []);
+    setImageDisplayMode(type, "single");
+}
+
+/* =====================================================
    SAVE PRODUCT TO FIRESTORE
 ===================================================== */
 
@@ -2946,12 +3490,32 @@ if (adminProductForm) {
                 const categoryVal = catEl ? catEl.value.trim() : "";
                 const badgeVal = badgeEl ? badgeEl.value.trim() : "";
 
+                const availableColors = getSelectedProductColors("add");
+                const imageDisplayMode = availableColors.length > 0 ? getImageDisplayMode("add") : "single";
+                const rawColorImages = (adminColorsState.add && adminColorsState.add.colorImages) || {};
+                const colorImages = {};
+
+                if (availableColors.length > 0 && imageDisplayMode === "colorCarousel") {
+                    for (const [col, url] of Object.entries(rawColorImages)) {
+                        if (url && typeof url === "string" && url.trim()) {
+                            const cleanUrl = url.trim();
+                            if (cleanUrl.startsWith("images/") || !/^https?:\/\//i.test(cleanUrl)) {
+                                throw new Error(`Invalid image URL for color "${col}". Only secure web URLs (https://...) are allowed.`);
+                            }
+                            colorImages[col] = cleanUrl;
+                        }
+                    }
+                }
+
                 const productData = {
                     name: name,
                     price: price,
                     stock: stock,
                     image: finalImageUrl,
                     description: description,
+                    availableColors: availableColors,
+                    imageDisplayMode: imageDisplayMode,
+                    colorImages: colorImages,
                     active: true,
                     createdAt: serverTimestamp(),
                     createdAtISO: new Date().toISOString()
@@ -2969,6 +3533,7 @@ if (adminProductForm) {
                 );
 
                 adminProductForm.reset();
+                resetAdminColors("add");
                 currentSelectedProductFile = null;
 
                 if (adminProductPreview) {
@@ -3024,6 +3589,136 @@ function showAdminProductMessage(
 /* =====================================================
    ADMIN MANAGE PRODUCTS
 ===================================================== */
+
+const ALORA_PRODUCTION_URL = "https://alora-handmade-jewelry.web.app";
+
+function getCanonicalProductUrl(productId) {
+    if (!productId || typeof productId !== "string") {
+        return "";
+    }
+
+    const cleanId = String(productId).trim();
+    if (!cleanId) {
+        return "";
+    }
+
+    const baseUrl = typeof ALORA_PRODUCTION_URL !== "undefined"
+        ? ALORA_PRODUCTION_URL
+        : "https://alora-handmade-jewelry.web.app";
+
+    const productUrl = new URL("product.html", baseUrl);
+    productUrl.search = "";
+    productUrl.searchParams.set("id", cleanId);
+    return productUrl.toString();
+}
+
+function showAdminCopyToast(message = "Product link copied!") {
+    if (typeof document === "undefined" || !document.body) {
+        return;
+    }
+
+    const existingToast = document.getElementById("adminCopyToast");
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    const toast = document.createElement("div");
+    toast.id = "adminCopyToast";
+    toast.className = "admin-copy-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    if (typeof requestAnimationFrame === "function") {
+        requestAnimationFrame(function () {
+            toast.classList.add("show");
+        });
+    } else {
+        toast.classList.add("show");
+    }
+
+    setTimeout(function () {
+        toast.classList.remove("show");
+        setTimeout(function () {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 300);
+    }, 2000);
+}
+
+async function copyProductLink(productId, buttonElement) {
+    const url = getCanonicalProductUrl(productId);
+    if (!url) {
+        console.error("Invalid product ID for copying link:", productId);
+        return false;
+    }
+
+    let copied = false;
+
+    // Primary: Modern Clipboard API
+    if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText === "function"
+    ) {
+        try {
+            await navigator.clipboard.writeText(url);
+            copied = true;
+        } catch (err) {
+            console.warn("navigator.clipboard.writeText failed, using fallback:", err);
+        }
+    }
+
+    // Secondary: Safe textarea fallback
+    if (!copied && typeof document !== "undefined") {
+        try {
+            const input = document.createElement("textarea");
+            input.value = url;
+            input.setAttribute("readonly", "");
+            input.style.position = "fixed";
+            input.style.left = "-9999px";
+            input.style.top = "-9999px";
+            input.style.opacity = "0";
+            document.body.appendChild(input);
+            input.focus();
+            input.select();
+            copied = document.execCommand("copy");
+            input.remove();
+        } catch (fallbackErr) {
+            console.error("Fallback clipboard copy failed:", fallbackErr);
+        }
+    }
+
+    // Temporary success message on the button
+    if (buttonElement) {
+        const originalText = buttonElement.dataset.originalText || buttonElement.textContent;
+        buttonElement.dataset.originalText = originalText;
+        buttonElement.textContent = "Product link copied!";
+        buttonElement.classList.add("copied");
+
+        if (buttonElement._copyTimeout) {
+            clearTimeout(buttonElement._copyTimeout);
+        }
+        buttonElement._copyTimeout = setTimeout(function () {
+            buttonElement.textContent = originalText;
+            buttonElement.classList.remove("copied");
+            buttonElement._copyTimeout = null;
+        }, 2000);
+    }
+
+    // Floating toast notification
+    showAdminCopyToast("Product link copied!");
+
+    return copied;
+}
+
+window.ALORA_PRODUCTION_URL = ALORA_PRODUCTION_URL;
+window.getCanonicalProductUrl = getCanonicalProductUrl;
+window.copyProductLink = copyProductLink;
+window.showAdminCopyToast = showAdminCopyToast;
 
 const adminProductsList =
     document.getElementById("adminProductsList");
@@ -3229,6 +3924,17 @@ async function loadAdminProducts() {
 
                     description:
                         product.description || "",
+
+                    category:
+                        product.category || "",
+
+                    badge:
+                        product.badge || "",
+
+                    availableColors:
+                        Array.isArray(product.availableColors)
+                            ? product.availableColors
+                            : [],
 
                     active:
                         product.active !== false
@@ -3458,6 +4164,15 @@ function renderAdminProducts(products) {
                     Delete
                 </button>
 
+                <button
+                    type="button"
+                    class="admin-product-copy-link-button"
+                    data-product-id="${escapeAdminHTML(product.id)}"
+                    title="Copy customer product link"
+                    aria-label="Copy customer product link for ${escapeAdminHTML(product.name)}">
+                    Copy Product Link
+                </button>
+
             </div>
         `;
 
@@ -3493,6 +4208,12 @@ function renderAdminProducts(products) {
             );
 
 
+        const copyButton =
+            productItem.querySelector(
+                ".admin-product-copy-link-button"
+            );
+
+
         editButton.addEventListener(
             "click",
             function () {
@@ -3521,6 +4242,19 @@ function renderAdminProducts(products) {
                 );
             }
         );
+
+
+        if (copyButton) {
+            copyButton.addEventListener(
+                "click",
+                async function () {
+                    await copyProductLink(
+                        product.id,
+                        copyButton
+                    );
+                }
+            );
+        }
 
 
         adminProductsList.appendChild(
@@ -3589,6 +4323,13 @@ function openAdminProductEditor(product) {
 
     adminProductModal.hidden = false;
 
+    setAdminColors(
+        "edit",
+        Array.isArray(product.availableColors) ? product.availableColors : [],
+        product.imageDisplayMode || "single",
+        (product.colorImages && typeof product.colorImages === "object") ? product.colorImages : {}
+    );
+
     document.body.style.overflow =
         "hidden";
 }
@@ -3605,6 +4346,7 @@ function closeAdminProductEditor() {
 
 
     adminProductModal.hidden = true;
+    resetAdminColors("edit");
 
     document.body.style.overflow = "";
 }
@@ -3764,6 +4506,29 @@ if (adminEditProductForm) {
                 const editCategory = adminEditProductCategory ? adminEditProductCategory.value.trim() : "";
                 const editBadge = adminEditProductBadge ? adminEditProductBadge.value.trim() : "";
 
+                const editAvailableColors = getSelectedProductColors("edit");
+                const editImageDisplayMode = editAvailableColors.length > 0 ? getImageDisplayMode("edit") : "single";
+                const rawEditColorImages = (adminColorsState.edit && adminColorsState.edit.colorImages) || {};
+                const editColorImages = {};
+
+                if (editAvailableColors.length > 0 && editImageDisplayMode === "colorCarousel") {
+                    for (const [col, url] of Object.entries(rawEditColorImages)) {
+                        if (url && typeof url === "string" && url.trim()) {
+                            const cleanUrl = url.trim();
+                            if (cleanUrl.startsWith("images/") || !/^https?:\/\//i.test(cleanUrl)) {
+                                throw new Error(`Invalid image URL for color "${col}". Only secure web URLs (https://...) are allowed.`);
+                            }
+                            editColorImages[col] = cleanUrl;
+                        }
+                    }
+                } else if (editImageDisplayMode === "single") {
+                    for (const [col, url] of Object.entries(rawEditColorImages)) {
+                        if (url && typeof url === "string" && !url.startsWith("images/") && /^https?:\/\//i.test(url)) {
+                            editColorImages[col] = url.trim();
+                        }
+                    }
+                }
+
                 const updatePayload = {
                     name: name,
                     price: price,
@@ -3772,6 +4537,9 @@ if (adminEditProductForm) {
                     description: description,
                     category: editCategory,
                     badge: editBadge,
+                    availableColors: editAvailableColors,
+                    imageDisplayMode: editImageDisplayMode,
+                    colorImages: editColorImages,
                     updatedAt: serverTimestamp()
                 };
 
@@ -3985,6 +4753,20 @@ function escapeAdminHTML(text) {
 /* =====================================================
    START PRODUCT MANAGEMENT
 ===================================================== */
+
+initAdminColors("add");
+initAdminColors("edit");
+
+window.initAdminColors = initAdminColors;
+window.getSelectedProductColors = getSelectedProductColors;
+window.setAdminColors = setAdminColors;
+window.resetAdminColors = resetAdminColors;
+window.renderAdminColorOptions = renderAdminColorOptions;
+window.addAdminCustomColor = addAdminCustomColor;
+window.getAdminColorBackground = getAdminColorBackground;
+window.getImageDisplayMode = getImageDisplayMode;
+window.setImageDisplayMode = setImageDisplayMode;
+window.renderAdminColorImagesList = renderAdminColorImagesList;
 
 loadAdminProducts();
 

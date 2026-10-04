@@ -164,11 +164,16 @@
 
     function extractProductSummary(order) {
         if (order.products) {
-            return String(order.products).trim();
+            const prod = String(order.products).trim();
+            if (order.selectedColor && !prod.toLowerCase().includes(order.selectedColor.toLowerCase())) {
+                return prod + " (Color: " + order.selectedColor + ")";
+            }
+            return prod;
         }
         if (Array.isArray(order.items) && order.items.length > 0) {
             return order.items.map(function (i) {
-                return i.name || "Item";
+                const col = (i.selectedColor || "").trim();
+                return (i.name || "Item") + (col ? " (Color: " + col + ")" : "");
             }).join(", ");
         }
         return "New Order";
@@ -221,6 +226,7 @@
         const productName = extractProductSummary(order);
         const quantity = extractOrderQuantity(order);
         const cleanAdminUrl = ensureProductionAdminUrl(adminUrl, id, userId);
+        const itemColor = String(order.selectedColor || (Array.isArray(order.items) && order.items.find(i => i.selectedColor)?.selectedColor) || "").trim();
 
         return {
             order_id: id,
@@ -230,6 +236,8 @@
             customer_email: String(order.email || "Not provided").trim(),
             delivery_address: String(order.address || "Not provided").trim(),
             products: productName,
+            color: itemColor,
+            selected_color: itemColor,
             quantity: quantity,
             total: String(order.total || "₹0").trim(),
             payment_method: String(order.payment || "Not specified").trim(),
@@ -246,6 +254,7 @@
         const quantity = extractOrderQuantity(order);
         const customerEmail = String(order.email || "").trim();
         const customerName = String(order.customer || "Valued Customer").trim();
+        const itemColor = String(order.selectedColor || (Array.isArray(order.items) && order.items.find(i => i.selectedColor)?.selectedColor) || "").trim();
 
         return {
             to_email: customerEmail,
@@ -255,6 +264,8 @@
             subject: "Your Alora Order Has Been Placed - " + id,
             order_date: String(order.date || new Date().toLocaleString("en-IN")).trim(),
             products: productName,
+            color: itemColor,
+            selected_color: itemColor,
             quantity: quantity,
             total: String(order.total || "₹0").trim(),
             payment_method: String(order.payment || "Not specified").trim(),

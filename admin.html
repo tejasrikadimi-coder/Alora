@@ -431,6 +431,69 @@
 
                     </div>
 
+
+                    <!-- AVAILABLE COLORS (OPTIONAL) -->
+                    <div class="admin-form-group full admin-colors-section" id="adminProductColorsGroup">
+                        <label class="admin-colors-heading">
+                            Available Colors (Optional)
+                        </label>
+                        <div class="admin-colors-toggle-wrapper">
+                            <label for="adminProductHasColors" class="admin-checkbox-label">
+                                <input type="checkbox" id="adminProductHasColors" class="admin-color-toggle-input">
+                                <span>This product has available colors</span>
+                            </label>
+                        </div>
+
+                        <div class="admin-colors-body" id="adminProductColorsBody" style="display: none;">
+                            <div class="admin-color-options-grid" id="adminProductColorOptions">
+                                <!-- Populated dynamically by admin.js -->
+                            </div>
+
+                            <div class="admin-add-custom-color-row">
+                                <input
+                                    type="text"
+                                    id="adminProductCustomColorInput"
+                                    placeholder="Enter custom color (e.g. Wine)"
+                                    class="admin-custom-color-input"
+                                    maxlength="40"
+                                >
+                                <button
+                                    type="button"
+                                    id="adminProductAddCustomColorBtn"
+                                    class="admin-add-color-btn"
+                                >
+                                    + Add Custom Color
+                                </button>
+                            </div>
+
+                            <div class="admin-selected-colors-preview" id="adminProductSelectedColorsPreview">
+                                <span class="preview-title">Selected:</span>
+                                <span class="preview-list" id="adminProductSelectedColorsText">None</span>
+                            </div>
+
+                            <div class="admin-image-mode-wrapper" id="adminProductImageModeWrapper">
+                                <label class="admin-image-mode-heading">Product Image Display:</label>
+                                <div class="admin-image-mode-options">
+                                    <label class="admin-radio-label">
+                                        <input type="radio" name="adminProductImageDisplayMode" value="single" id="adminProductImageModeSingle" checked>
+                                        <span>Single Image</span>
+                                    </label>
+                                    <label class="admin-radio-label">
+                                        <input type="radio" name="adminProductImageDisplayMode" value="colorCarousel" id="adminProductImageModeCarousel">
+                                        <span>Color-wise Images / Carousel</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="admin-color-images-section" id="adminProductColorImagesSection" style="display: none;">
+                                <label class="admin-color-images-heading">Assign Image Per Color (Cloudinary):</label>
+                                <div class="admin-color-images-list" id="adminProductColorImagesList">
+                                    <!-- Populated dynamically by admin.js -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
 
@@ -820,6 +883,69 @@
                     required
                 ></textarea>
 
+            </div>
+
+
+            <!-- EDIT AVAILABLE COLORS (OPTIONAL) -->
+            <div class="admin-form-group full admin-colors-section" id="adminEditProductColorsGroup">
+                <label class="admin-colors-heading">
+                    Available Colors (Optional)
+                </label>
+                <div class="admin-colors-toggle-wrapper">
+                    <label for="adminEditProductHasColors" class="admin-checkbox-label">
+                        <input type="checkbox" id="adminEditProductHasColors" class="admin-color-toggle-input">
+                        <span>This product has available colors</span>
+                    </label>
+                </div>
+
+                <div class="admin-colors-body" id="adminEditProductColorsBody" style="display: none;">
+                    <div class="admin-color-options-grid" id="adminEditProductColorOptions">
+                        <!-- Populated dynamically by admin.js -->
+                    </div>
+
+                    <div class="admin-add-custom-color-row">
+                        <input
+                            type="text"
+                            id="adminEditProductCustomColorInput"
+                            placeholder="Enter custom color (e.g. Wine)"
+                            class="admin-custom-color-input"
+                            maxlength="40"
+                        >
+                        <button
+                            type="button"
+                            id="adminEditProductAddCustomColorBtn"
+                            class="admin-add-color-btn"
+                        >
+                            + Add Custom Color
+                        </button>
+                    </div>
+
+                    <div class="admin-selected-colors-preview" id="adminEditProductSelectedColorsPreview">
+                        <span class="preview-title">Selected:</span>
+                        <span class="preview-list" id="adminEditProductSelectedColorsText">None</span>
+                    </div>
+
+                    <div class="admin-image-mode-wrapper" id="adminEditProductImageModeWrapper">
+                        <label class="admin-image-mode-heading">Product Image Display:</label>
+                        <div class="admin-image-mode-options">
+                            <label class="admin-radio-label">
+                                <input type="radio" name="adminEditProductImageDisplayMode" value="single" id="adminEditProductImageModeSingle" checked>
+                                <span>Single Image</span>
+                            </label>
+                            <label class="admin-radio-label">
+                                <input type="radio" name="adminEditProductImageDisplayMode" value="colorCarousel" id="adminEditProductImageModeCarousel">
+                                <span>Color-wise Images / Carousel</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="admin-color-images-section" id="adminEditProductColorImagesSection" style="display: none;">
+                        <label class="admin-color-images-heading">Assign Image Per Color (Cloudinary):</label>
+                        <div class="admin-color-images-list" id="adminEditProductColorImagesList">
+                            <!-- Populated dynamically by admin.js -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
 

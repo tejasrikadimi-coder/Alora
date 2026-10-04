@@ -169,6 +169,16 @@
     id="productStockStatus">
 </p>
 
+            <!-- AVAILABLE COLORS (SHOWN ONLY IF CONFIGURED) -->
+            <div class="product-colors-section" id="productColorsSection" style="display: none;">
+                <div class="product-colors-header">
+                    <h3 class="product-colors-title" id="productColorsTitle">Available Colors</h3>
+                    <span class="product-selected-color-label" id="productSelectedColorLabel">Select a color</span>
+                </div>
+                <div class="product-color-chips" id="productColorChips" role="radiogroup" aria-labelledby="productColorsTitle"></div>
+                <div class="product-color-error" id="productColorError" style="display: none;" role="alert">Please select a color before adding this product to cart.</div>
+            </div>
+
             <p class="desc" id="productDescription">
                 Handcrafted premium jewellery made with love and elegance.
                 Perfect for weddings, parties, festivals and gifting.

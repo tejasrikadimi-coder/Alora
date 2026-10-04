@@ -732,11 +732,13 @@ function getCorrectProduct(name) {
 function normalizeProduct(item) {
     return {
         id: item.id || "",
+        productId: item.productId || (item.id ? item.id.split("___")[0] : ""),
         name: item.name,
 
         price: Number(item.price),
 
         image: item.image,
+        selectedColor: item.selectedColor || "",
 
         quantity:
     Number(item.quantity) || 1,
@@ -793,6 +795,16 @@ async function getAuthoritativeProducts() {
                                 )
                                     ? Number(data.stock)
                                     : 0,
+                            availableColors:
+                                Array.isArray(data.availableColors)
+                                    ? data.availableColors
+                                    : [],
+                            imageDisplayMode:
+                                data.imageDisplayMode || "single",
+                            colorImages:
+                                (data.colorImages && typeof data.colorImages === "object")
+                                    ? data.colorImages
+                                    : {},
                             active:
                                 data.active !== false
                         };
@@ -818,10 +830,11 @@ async function resolveWishlistItems(items) {
         await getAuthoritativeProducts();
 
     return items.map(function (item) {
-        const idMatch = item.id
+        const actualId = item.productId || (item.id ? item.id.split("___")[0] : "");
+        const idMatch = actualId
             ? firestoreProducts.find(
                 product =>
-                    product.id === item.id
+                    product.id === actualId
             )
             : null;
         const nameMatches =
@@ -834,26 +847,34 @@ async function resolveWishlistItems(items) {
         const product =
             idMatch ||
             (
-                !item.id &&
+                !actualId &&
                 nameMatches.length === 1
                     ? nameMatches[0]
                     : null
             );
 
-        return product
-            ? {
+        if (product) {
+            const colorImg = (product.imageDisplayMode === "colorCarousel" && product.colorImages && item.selectedColor && product.colorImages[item.selectedColor])
+                ? product.colorImages[item.selectedColor]
+                : product.image;
+
+            return {
                 ...item,
-                id: product.id,
+                id: item.id || product.id,
+                productId: product.id,
                 name: product.name,
                 price: product.price,
-                image: product.image,
+                image: colorImg,
                 stock: product.stock,
+                selectedColor: item.selectedColor || "",
                 unavailable: false
-            }
-            : {
+            };
+        } else {
+            return {
                 ...item,
                 unavailable: true
             };
+        }
     });
 }
 
@@ -920,7 +941,123 @@ function showProductUnavailable(message) {
         descriptionElement.textContent =
             "This product is no longer available.";
     }
+    const colorsSection = document.getElementById("productColorsSection");
+    if (colorsSection) {
+        colorsSection.style.display = "none";
+    }
     setProductActionsDisabled(true);
+}
+
+function getAloraColorBackground(colorName) {
+    if (!colorName || typeof colorName !== "string") return "linear-gradient(135deg, #f5d77f, #d4af37)";
+    const normalized = colorName.trim().toLowerCase();
+    switch (normalized) {
+        case "gold":
+            return "linear-gradient(135deg, #f5d77f, #d4af37)";
+        case "silver":
+            return "linear-gradient(135deg, #f0f0f0, #c0c0c0)";
+        case "rose gold":
+            return "linear-gradient(135deg, #fad0c4, #b76e79)";
+        case "white":
+            return "#ffffff";
+        case "black":
+            return "#1a1a1a";
+        case "red":
+            return "#d32f2f";
+        case "blue":
+            return "#1976d2";
+        case "green":
+            return "#2e7d32";
+        case "purple":
+            return "#7b1fa2";
+        case "pink":
+            return "#e91e63";
+        case "maroon":
+            return "#800000";
+        case "multicolor":
+            return "linear-gradient(135deg, #e91e63, #ff9800, #4caf50, #2196f3)";
+        case "yellow":
+            return "#fbc02d";
+        case "orange":
+            return "#fb8c00";
+        case "brown":
+            return "#795548";
+        case "grey":
+        case "gray":
+            return "#9e9e9e";
+        case "copper":
+            return "#b87333";
+        case "bronze":
+            return "#cd7f32";
+        case "wine":
+            return "#722f37";
+        case "teal":
+            return "#00897b";
+        case "turquoise":
+            return "#40e0d0";
+        case "lavender":
+            return "#b39ddb";
+        case "peach":
+            return "#ffccbc";
+        case "coral":
+            return "#ff7043";
+        default:
+            return "linear-gradient(135deg, #e0d0b0, #b68b00)";
+    }
+}
+
+let selectedProductColor = "";
+
+function selectProductColor(colorName, product) {
+    selectedProductColor = colorName;
+
+    const colorChipsContainer = document.getElementById("productColorChips");
+    if (colorChipsContainer) {
+        const chips = colorChipsContainer.querySelectorAll(".product-color-chip");
+        chips.forEach(chip => {
+            const isMatch = (chip.getAttribute("data-color") || "").toLowerCase() === String(colorName).toLowerCase();
+            if (isMatch) {
+                chip.classList.add("selected");
+                chip.setAttribute("aria-checked", "true");
+            } else {
+                chip.classList.remove("selected");
+                chip.setAttribute("aria-checked", "false");
+            }
+        });
+    }
+
+    const labelEl = document.getElementById("productSelectedColorLabel");
+    if (labelEl) {
+        labelEl.textContent = `Selected: ${colorName} ✓`;
+    }
+
+    const errorEl = document.getElementById("productColorError");
+    if (errorEl) {
+        errorEl.style.display = "none";
+    }
+
+    if (product && product.imageDisplayMode === "colorCarousel" && product.colorImages) {
+        const imgUrl = product.colorImages[colorName];
+        const mainImg = document.getElementById("productImage");
+        if (imgUrl && mainImg) {
+            mainImg.src = imgUrl;
+        } else if (product.image && mainImg) {
+            mainImg.src = product.image;
+        }
+
+        const gallery = document.getElementById("productThumbnailGallery");
+        if (gallery) {
+            const thumbs = gallery.querySelectorAll(".product-thumb-item");
+            thumbs.forEach(t => {
+                const match = (t.getAttribute("data-color") || "").toLowerCase() === String(colorName).toLowerCase();
+                if (match) {
+                    t.classList.add("active");
+                } else {
+                    t.classList.remove("active");
+                }
+            });
+        }
+    }
 }
 
 function renderProductDetails(product) {
@@ -979,6 +1116,113 @@ function renderProductDetails(product) {
         descriptionElement.textContent =
             product.description ||
             "Handcrafted premium jewellery made with love and elegance.";
+    }
+
+    selectedProductColor = "";
+    const colorErrorEl = document.getElementById("productColorError");
+    if (colorErrorEl) colorErrorEl.style.display = "none";
+    const selectedColorLabel = document.getElementById("productSelectedColorLabel");
+    if (selectedColorLabel) selectedColorLabel.textContent = "Select a color";
+
+    // Available Colors section (rendered ONLY if configured for this product)
+    const colorsSection = document.getElementById("productColorsSection");
+    const colorChipsContainer = document.getElementById("productColorChips");
+    const galleryContainer = document.getElementById("productThumbnailGallery");
+
+    if (colorsSection && colorChipsContainer) {
+        colorChipsContainer.innerHTML = "";
+        const rawColors = product.availableColors;
+        const availableColors = Array.isArray(rawColors)
+            ? rawColors
+                .filter(c => typeof c === "string" && c.trim())
+                .map(c => c.trim())
+                .filter((c, idx, arr) => arr.findIndex(x => x.toLowerCase() === c.toLowerCase()) === idx)
+            : [];
+
+        if (availableColors.length > 0) {
+            availableColors.forEach(colorName => {
+                const chip = document.createElement("button");
+                chip.type = "button";
+                chip.className = "product-color-chip";
+                chip.setAttribute("role", "radio");
+                chip.setAttribute("aria-checked", "false");
+                chip.setAttribute("data-color", colorName);
+
+                const dot = document.createElement("span");
+                dot.className = "product-color-dot";
+                dot.setAttribute("aria-hidden", "true");
+                dot.style.background = getAloraColorBackground(colorName);
+
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "product-color-name";
+                nameSpan.textContent = colorName;
+
+                const checkSpan = document.createElement("span");
+                checkSpan.className = "product-color-check";
+                checkSpan.setAttribute("aria-hidden", "true");
+                checkSpan.textContent = "✓";
+
+                chip.appendChild(dot);
+                chip.appendChild(nameSpan);
+                chip.appendChild(checkSpan);
+
+                chip.addEventListener("click", function () {
+                    selectProductColor(colorName, product);
+                });
+
+                colorChipsContainer.appendChild(chip);
+            });
+            colorsSection.style.display = "block";
+        } else {
+            colorsSection.style.display = "none";
+        }
+    }
+
+    // Color Carousel / Thumbnail Gallery
+    if (galleryContainer) {
+        galleryContainer.innerHTML = "";
+        const rawColors = product.availableColors;
+        const availableColors = Array.isArray(rawColors)
+            ? rawColors.filter(c => typeof c === "string" && c.trim()).map(c => c.trim())
+            : [];
+
+        if (
+            product.imageDisplayMode === "colorCarousel" &&
+            product.colorImages &&
+            typeof product.colorImages === "object" &&
+            availableColors.length > 0
+        ) {
+            availableColors.forEach(colorName => {
+                const imgUrl = product.colorImages[colorName] || product.image;
+                if (!imgUrl) return;
+
+                const thumb = document.createElement("button");
+                thumb.type = "button";
+                thumb.className = "product-thumb-item";
+                thumb.setAttribute("data-color", colorName);
+                thumb.setAttribute("aria-label", "View " + colorName);
+
+                const thumbImg = document.createElement("img");
+                thumbImg.src = imgUrl;
+                thumbImg.alt = (product.name || "Product") + " - " + colorName;
+
+                const thumbName = document.createElement("span");
+                thumbName.className = "thumb-color-name";
+                thumbName.textContent = colorName;
+
+                thumb.appendChild(thumbImg);
+                thumb.appendChild(thumbName);
+
+                thumb.addEventListener("click", function () {
+                    selectProductColor(colorName, product);
+                });
+
+                galleryContainer.appendChild(thumb);
+            });
+            galleryContainer.style.display = galleryContainer.children.length > 0 ? "flex" : "none";
+        } else {
+            galleryContainer.style.display = "none";
+        }
     }
 
     currentProductStock = stock;
@@ -1045,9 +1289,9 @@ function renderProductDetails(product) {
         }
     }
 
-    // Thumbnail gallery
+    // Thumbnail gallery (only when not in colorCarousel mode)
     const thumbGallery = document.getElementById("productThumbnailGallery");
-    if (thumbGallery) {
+    if (thumbGallery && product.imageDisplayMode !== "colorCarousel") {
         thumbGallery.innerHTML = "";
         const allImgs = Array.isArray(product.images) && product.images.length > 0
             ? product.images
@@ -1341,7 +1585,8 @@ async function loadProductDetails() {
                 : 0,
             description: "",
             category: "Custom Jewellery",
-            badge: null
+            badge: null,
+            availableColors: []
         };
         renderProductDetails(currentProduct);
         return;
@@ -1376,6 +1621,14 @@ async function loadProductDetails() {
             ? window.determineProductBadge(data)
             : null;
 
+        const rawColors = data.availableColors;
+        const availableColors = Array.isArray(rawColors)
+            ? rawColors
+                .filter(c => typeof c === "string" && c.trim())
+                .map(c => c.trim())
+                .filter((c, idx, arr) => arr.findIndex(x => x.toLowerCase() === c.toLowerCase()) === idx)
+            : [];
+
         currentProduct = {
             id: productSnapshot.id,
             name: data.name || "Alora Jewellery",
@@ -1387,7 +1640,8 @@ async function loadProductDetails() {
                 : 0,
             description: data.description || "",
             category: category,
-            badge: badge
+            badge: badge,
+            availableColors: availableColors
         };
         renderProductDetails(currentProduct);
     } catch (error) {
@@ -1944,10 +2198,12 @@ function getCart() {
 
 function saveCart(cart) {
     if (activeAccountUid) {
-        accountCart =
+         accountCart =
             cart.map(function (item) {
                 return {
                     id: item.id,
+                    productId: item.productId || (item.id ? item.id.split("___")[0] : ""),
+                    selectedColor: item.selectedColor || "",
                     quantity:
                         Number(item.quantity)
                 };
@@ -1983,18 +2239,23 @@ function addToCart(
     image,
     qty = 1,
     stock = Number.POSITIVE_INFINITY,
-    id = ""
+    id = "",
+    selectedColor = ""
 ) {
     if (!accountDataReadyForWrite()) {
         return;
     }
 
+    const cleanColor = (typeof selectedColor === "string" ? selectedColor.trim() : "");
     const cart = getCart();
 
     const existing = cart.find(
-        item =>
-            (id && item.id === id) ||
-            (!id && item.name === name)
+        item => {
+            const idMatch = (id && ((item.productId && item.productId === id) || (item.id && (item.id === id || item.id.split("___")[0] === id)))) ||
+                            (!id && item.name === name);
+            const itemColor = (item.selectedColor || "").trim().toLowerCase();
+            return idMatch && itemColor === cleanColor.toLowerCase();
+        }
     );
 
     const addedQuantity =
@@ -2008,13 +2269,16 @@ function addToCart(
             addedQuantity;
 
     } else {
+        const compositeId = id ? (cleanColor ? id + "___" + encodeURIComponent(cleanColor.toLowerCase()) : id) : "";
         cart.push({
             name: name,
-            id: id,
+            id: compositeId || id,
+            productId: id || "",
             price: Number(price),
             image: image,
             quantity: addedQuantity,
-             stock: Number(stock)
+            stock: Number(stock),
+            selectedColor: cleanColor
         });
     }
 
@@ -2022,19 +2286,22 @@ function addToCart(
 
     // Trigger Analytics add_to_cart event
     if (typeof window.trackAloraAnalyticsEvent === "function") {
-        window.trackAloraAnalyticsEvent("add_to_cart", {
-            currency: "INR",
-            value: Number(price) * addedQuantity,
-            items: [{
-                item_id: id || "",
-                item_name: name,
-                price: Number(price),
-                quantity: addedQuantity
-            }]
-        });
+        try {
+            window.trackAloraAnalyticsEvent("add_to_cart", {
+                currency: "INR",
+                value: Number(price) * addedQuantity,
+                items: [{
+                    item_id: id || "",
+                    item_name: name,
+                    item_variant: cleanColor || undefined,
+                    price: Number(price),
+                    quantity: addedQuantity
+                }]
+            });
+        } catch (_) {}
     }
 
-    showCartMessage(name);
+    showCartMessage(name + (cleanColor ? ` (${cleanColor})` : ""));
     renderCart();
 }
 
@@ -2111,13 +2378,35 @@ function addCurrentProductToCart() {
         return;
     }
 
+    const currentColor = (typeof selectedProductColor !== "undefined" ? selectedProductColor : "");
+    const rawColors = currentProduct.availableColors;
+    const hasColors = Array.isArray(rawColors) && rawColors.length > 0;
+    if (hasColors && !currentColor) {
+        const errorEl = document.getElementById("productColorError");
+        if (errorEl) {
+            errorEl.textContent = "Please select a color before adding this product to cart.";
+            errorEl.style.display = "block";
+        }
+        return;
+    }
+
+    const errorEl = document.getElementById("productColorError");
+    if (errorEl) {
+        errorEl.style.display = "none";
+    }
+
+    const itemImage = (currentProduct.imageDisplayMode === "colorCarousel" && currentProduct.colorImages && currentColor && currentProduct.colorImages[currentColor])
+        ? currentProduct.colorImages[currentColor]
+        : currentProduct.image;
+
     addToCart(
         currentProduct.name,
         currentProduct.price,
-        currentProduct.image,
+        itemImage,
         quantity,
         currentProduct.stock,
-        currentProduct.id
+        currentProduct.id,
+        currentColor
     );
 }
 
@@ -2198,6 +2487,8 @@ async function renderCart() {
             accountCart =
                 cart.map(item => ({
                     id: item.id,
+                    productId: item.productId || (item.id ? item.id.split("___")[0] : ""),
+                    selectedColor: item.selectedColor || "",
                     quantity: item.quantity
                 }));
         } catch (error) {
@@ -2268,6 +2559,8 @@ async function renderCart() {
                 <h3>
                     ${item.name}
                 </h3>
+
+                ${item.selectedColor ? `<p class="cart-item-color">Color: <strong>${escapeHTML(item.selectedColor)}</strong></p>` : ""}
 
                 <p class="cart-item-price">
                     ₹${item.price}
@@ -2412,6 +2705,20 @@ function removeFromCart(index) {
 ===================================================== */
 
 function buyNow(name, price) {
+    const currentColor = (typeof selectedProductColor !== "undefined" ? selectedProductColor : "");
+    if (currentProduct) {
+        const rawColors = currentProduct.availableColors;
+        const hasColors = Array.isArray(rawColors) && rawColors.length > 0;
+        if (hasColors && !currentColor) {
+            const errorEl = document.getElementById("productColorError");
+            if (errorEl) {
+                errorEl.textContent = "Please select a color before adding this product to cart.";
+                errorEl.style.display = "block";
+            }
+            return;
+        }
+    }
+
     if (
         !name &&
         currentProduct
@@ -2453,6 +2760,14 @@ function buyNow(name, price) {
         "quantity",
         quantity || 1
     );
+
+    if (currentProduct && currentProduct.id) {
+        params.set("id", currentProduct.id);
+    }
+
+    if (currentColor) {
+        params.set("color", currentColor);
+    }
 
     window.location.href =
         "order.html?" +
@@ -2566,9 +2881,11 @@ async function checkoutCart() {
                     .map(function (item) {
                         return {
                             id: item.id,
+                            productId: item.productId || (item.id ? item.id.split("___")[0] : ""),
                             name: item.name,
                             price: item.price,
                             image: item.image,
+                            selectedColor: item.selectedColor || "",
                             stock: item.stock,
                             quantity: Math.min(
                                 item.quantity,
@@ -2644,6 +2961,9 @@ function loadOrderPage() {
         const name =
             params.get("name");
 
+        const color =
+            params.get("color");
+
         const price =
             Number(
                 params.get("price")
@@ -2659,7 +2979,7 @@ function loadOrderPage() {
         orderUnitPrice = price;
         isCartCheckout = false;
 
-        productName.value = name;
+        productName.value = name + (color ? ` (${color})` : "");
 
         productPrice.value =
             "₹" + price;
@@ -2698,6 +3018,7 @@ function loadOrderPage() {
             .map(
                 item =>
                     item.name +
+                    (item.selectedColor ? ` (${item.selectedColor})` : "") +
                     " × " +
                     item.quantity
             )
@@ -3391,23 +3712,31 @@ async function placeOrder() {
         );
 /* ORDER ITEMS FOR STOCK UPDATE */
 
+const orderParams = new URLSearchParams(window.location.search);
+const singleColor = (!isCartCheckout && orderParams.get("color")) ? orderParams.get("color").trim() : "";
+
 const orderItems =
     isCartCheckout
         ? cartCheckoutSnapshot.map(item => ({
-            id: item.id || "",
+            id: item.productId || (item.id ? item.id.split("___")[0] : item.id) || "",
             name: item.name,
+            price: Number(item.price) || 0,
             quantity:
-                Number(item.quantity) || 1
+                Number(item.quantity) || 1,
+            ...(item.selectedColor ? { selectedColor: item.selectedColor } : {})
         }))
         : [
             {
-                name:
-                    productName.value,
-
+                id: orderParams.get("id") || (currentProduct && currentProduct.id) || "",
+                name: orderParams.get("name") || productName.value,
+                price: orderUnitPrice || Number(productPrice.value.replace(/[^0-9.]/g, "")) || 0,
                 quantity:
-                    orderQuantity
+                    orderQuantity,
+                ...(singleColor ? { selectedColor: singleColor } : {})
             }
         ];
+
+        const topLevelColor = singleColor || (orderItems.find(i => i.selectedColor)?.selectedColor || "");
 
         /* CREATE ORDER */
 
@@ -3421,6 +3750,7 @@ const orderItems =
                 orderQuantity,
             items:
                 orderItems,
+            ...(topLevelColor ? { selectedColor: topLevelColor } : {}),
 
             total:
                 totalPriceElement
@@ -3624,23 +3954,21 @@ const orderItems =
 
         // Trigger purchase analytics event
         if (typeof window.trackAloraAnalyticsEvent === "function") {
-            window.trackAloraAnalyticsEvent("purchase", {
-                transaction_id: orderId,
-                value: totalPrice,
-                currency: "INR",
-                payment_type: payment.value,
-                items: isCartCheckout ? cart.map(item => ({
-                    item_id: item.id || "",
-                    item_name: item.name,
-                    price: item.price,
-                    quantity: item.quantity
-                })) : [{
-                    item_id: currentProduct ? (currentProduct.id || "") : "",
-                    item_name: productName.textContent,
-                    price: orderUnitPrice,
-                    quantity: Number(quantity) || 1
-                }]
-            });
+            try {
+                window.trackAloraAnalyticsEvent("purchase", {
+                    transaction_id: orderId,
+                    value: totalPrice,
+                    currency: "INR",
+                    payment_type: payment.value,
+                    items: orderItems.map(item => ({
+                        item_id: item.id || "",
+                        item_name: item.name,
+                        item_variant: item.selectedColor || undefined,
+                        price: item.price,
+                        quantity: item.quantity
+                    }))
+                });
+            } catch (_) {}
         }
 
         // Render On-Page Order Confirmation Card (Phase 15 & 16)

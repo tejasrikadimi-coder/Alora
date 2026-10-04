@@ -237,11 +237,19 @@ function createOrderCard(orderId, order) {
 
                 <span>PRODUCTS</span>
 
-                <strong>
-                    ${escapeHTML(
-                        order.products || ""
-                    )}
-                </strong>
+                ${Array.isArray(order.items) && order.items.length > 0
+                    ? order.items.map(item => `
+                        <div class="my-orders-item-row" style="margin-bottom: 6px;">
+                            <strong>${escapeHTML(item.name || "")}</strong>
+                            ${item.selectedColor ? `<span class="my-orders-item-color" style="display:block; color: var(--gold, #b68b00); font-weight: 600; font-size: 12px;">Color: ${escapeHTML(item.selectedColor)}</span>` : ""}
+                            ${order.items.length > 1 ? `<small style="display:block; color: #666; font-size: 11.5px;">Qty: ${Number(item.quantity) || 1}</small>` : ""}
+                        </div>
+                    `).join("")
+                    : `
+                        <strong>${escapeHTML(order.products || "")}</strong>
+                        ${order.selectedColor ? `<span class="my-orders-item-color" style="display:block; color: var(--gold, #b68b00); font-weight: 600; font-size: 12px;">Color: ${escapeHTML(order.selectedColor)}</span>` : ""}
+                    `
+                }
 
             </div>
 
