@@ -1006,6 +1006,18 @@ function getAloraColorBackground(colorName) {
     }
 }
 
+function getProductColorImage(product, colorName) {
+    if (!product || !product.colorImages || !colorName) return "";
+    const direct = product.colorImages[colorName];
+    if (direct && typeof direct === "string" && direct.trim()) return direct.trim();
+    const targetKey = String(colorName).trim().toLowerCase();
+    const matchingKey = Object.keys(product.colorImages).find(k => k.trim().toLowerCase() === targetKey);
+    if (matchingKey && product.colorImages[matchingKey] && typeof product.colorImages[matchingKey] === "string") {
+        return product.colorImages[matchingKey].trim();
+    }
+    return "";
+}
+
 let selectedProductColor = "";
 
 function selectProductColor(colorName, product) {
@@ -1037,7 +1049,7 @@ function selectProductColor(colorName, product) {
     }
 
     if (product && product.imageDisplayMode === "colorCarousel" && product.colorImages) {
-        const imgUrl = product.colorImages[colorName];
+        const imgUrl = getProductColorImage(product, colorName);
         const mainImg = document.getElementById("productImage");
         if (imgUrl && mainImg) {
             mainImg.src = imgUrl;
@@ -1109,7 +1121,28 @@ function renderProductDetails(product) {
     }
 
 
-    imageElement.src = image;
+    const isCarousel = Boolean(
+        product &&
+        product.imageDisplayMode === "colorCarousel" &&
+        Array.isArray(product.availableColors) &&
+        product.availableColors.length > 0
+    );
+
+    const rawColors = (product && product.availableColors) || [];
+    const availableColors = isCarousel
+        ? rawColors
+            .filter(c => typeof c === "string" && c.trim())
+            .map(c => c.trim())
+            .filter((c, idx, arr) => arr.findIndex(x => x.toLowerCase() === c.toLowerCase()) === idx)
+        : [];
+
+    if (isCarousel && availableColors.length > 0) {
+        const firstColor = availableColors[0];
+        const firstImg = getProductColorImage(product, firstColor) || product.image;
+        imageElement.src = firstImg;
+    } else {
+        imageElement.src = image;
+    }
     imageElement.alt = name;
 
     if (descriptionElement) {
@@ -1124,22 +1157,15 @@ function renderProductDetails(product) {
     const selectedColorLabel = document.getElementById("productSelectedColorLabel");
     if (selectedColorLabel) selectedColorLabel.textContent = "Select a color";
 
-    // Available Colors section (rendered ONLY if configured for this product)
+    // Available Colors section (rendered ONLY if configured in colorCarousel mode)
     const colorsSection = document.getElementById("productColorsSection");
     const colorChipsContainer = document.getElementById("productColorChips");
     const galleryContainer = document.getElementById("productThumbnailGallery");
 
     if (colorsSection && colorChipsContainer) {
         colorChipsContainer.innerHTML = "";
-        const rawColors = product.availableColors;
-        const availableColors = Array.isArray(rawColors)
-            ? rawColors
-                .filter(c => typeof c === "string" && c.trim())
-                .map(c => c.trim())
-                .filter((c, idx, arr) => arr.findIndex(x => x.toLowerCase() === c.toLowerCase()) === idx)
-            : [];
 
-        if (availableColors.length > 0) {
+        if (isCarousel && availableColors.length > 0) {
             availableColors.forEach(colorName => {
                 const chip = document.createElement("button");
                 chip.type = "button";
@@ -1181,19 +1207,10 @@ function renderProductDetails(product) {
     // Color Carousel / Thumbnail Gallery
     if (galleryContainer) {
         galleryContainer.innerHTML = "";
-        const rawColors = product.availableColors;
-        const availableColors = Array.isArray(rawColors)
-            ? rawColors.filter(c => typeof c === "string" && c.trim()).map(c => c.trim())
-            : [];
 
-        if (
-            product.imageDisplayMode === "colorCarousel" &&
-            product.colorImages &&
-            typeof product.colorImages === "object" &&
-            availableColors.length > 0
-        ) {
+        if (isCarousel && availableColors.length > 0) {
             availableColors.forEach(colorName => {
-                const imgUrl = product.colorImages[colorName] || product.image;
+                const imgUrl = getProductColorImage(product, colorName) || product.image;
                 if (!imgUrl) return;
 
                 const thumb = document.createElement("button");
@@ -1220,6 +1237,20 @@ function renderProductDetails(product) {
                 galleryContainer.appendChild(thumb);
             });
             galleryContainer.style.display = galleryContainer.children.length > 0 ? "flex" : "none";
+        } else if (Array.isArray(product.images) && product.images.length > 1) {
+            product.images.forEach((imgUrl, idx) => {
+                const thumb = document.createElement("img");
+                thumb.src = imgUrl;
+                thumb.alt = `${name} thumbnail ${idx + 1}`;
+                thumb.className = "product-thumb" + (idx === 0 ? " active" : "");
+                thumb.addEventListener("click", () => {
+                    imageElement.src = imgUrl;
+                    galleryContainer.querySelectorAll(".product-thumb").forEach(t => t.classList.remove("active"));
+                    thumb.classList.add("active");
+                });
+                galleryContainer.appendChild(thumb);
+            });
+            galleryContainer.style.display = "flex";
         } else {
             galleryContainer.style.display = "none";
         }
@@ -1286,32 +1317,6 @@ function renderProductDetails(product) {
             b.className = "product-card-badge " + product.badge.className;
             b.textContent = product.badge.text;
             badgeContainer.appendChild(b);
-        }
-    }
-
-    // Thumbnail gallery (only when not in colorCarousel mode)
-    const thumbGallery = document.getElementById("productThumbnailGallery");
-    if (thumbGallery && product.imageDisplayMode !== "colorCarousel") {
-        thumbGallery.innerHTML = "";
-        const allImgs = Array.isArray(product.images) && product.images.length > 0
-            ? product.images
-            : (product.image ? [product.image] : []);
-        if (allImgs.length > 1) {
-            allImgs.forEach((imgUrl, idx) => {
-                const thumb = document.createElement("img");
-                thumb.src = imgUrl;
-                thumb.alt = `${name} thumbnail ${idx + 1}`;
-                thumb.className = "product-thumb" + (idx === 0 ? " active" : "");
-                thumb.addEventListener("click", () => {
-                    imageElement.src = imgUrl;
-                    thumbGallery.querySelectorAll(".product-thumb").forEach(t => t.classList.remove("active"));
-                    thumb.classList.add("active");
-                });
-                thumbGallery.appendChild(thumb);
-            });
-            thumbGallery.style.display = "flex";
-        } else {
-            thumbGallery.style.display = "none";
         }
     }
 
@@ -1629,6 +1634,9 @@ async function loadProductDetails() {
                 .filter((c, idx, arr) => arr.findIndex(x => x.toLowerCase() === c.toLowerCase()) === idx)
             : [];
 
+        const imageDisplayMode = data.imageDisplayMode === "colorCarousel" ? "colorCarousel" : "single";
+        const colorImages = (data.colorImages && typeof data.colorImages === "object") ? data.colorImages : {};
+
         currentProduct = {
             id: productSnapshot.id,
             name: data.name || "Alora Jewellery",
@@ -1641,7 +1649,9 @@ async function loadProductDetails() {
             description: data.description || "",
             category: category,
             badge: badge,
-            availableColors: availableColors
+            availableColors: imageDisplayMode === "colorCarousel" ? availableColors : [],
+            imageDisplayMode: imageDisplayMode,
+            colorImages: colorImages
         };
         renderProductDetails(currentProduct);
     } catch (error) {
@@ -2380,8 +2390,8 @@ function addCurrentProductToCart() {
 
     const currentColor = (typeof selectedProductColor !== "undefined" ? selectedProductColor : "");
     const rawColors = currentProduct.availableColors;
-    const hasColors = Array.isArray(rawColors) && rawColors.length > 0;
-    if (hasColors && !currentColor) {
+    const isCarousel = currentProduct.imageDisplayMode === "colorCarousel" && Array.isArray(rawColors) && rawColors.length > 0;
+    if (isCarousel && !currentColor) {
         const errorEl = document.getElementById("productColorError");
         if (errorEl) {
             errorEl.textContent = "Please select a color before adding this product to cart.";
@@ -2395,8 +2405,8 @@ function addCurrentProductToCart() {
         errorEl.style.display = "none";
     }
 
-    const itemImage = (currentProduct.imageDisplayMode === "colorCarousel" && currentProduct.colorImages && currentColor && currentProduct.colorImages[currentColor])
-        ? currentProduct.colorImages[currentColor]
+    const itemImage = (isCarousel && currentColor && getProductColorImage(currentProduct, currentColor))
+        ? getProductColorImage(currentProduct, currentColor)
         : currentProduct.image;
 
     addToCart(
@@ -2708,8 +2718,8 @@ function buyNow(name, price) {
     const currentColor = (typeof selectedProductColor !== "undefined" ? selectedProductColor : "");
     if (currentProduct) {
         const rawColors = currentProduct.availableColors;
-        const hasColors = Array.isArray(rawColors) && rawColors.length > 0;
-        if (hasColors && !currentColor) {
+        const isCarousel = currentProduct.imageDisplayMode === "colorCarousel" && Array.isArray(rawColors) && rawColors.length > 0;
+        if (isCarousel && !currentColor) {
             const errorEl = document.getElementById("productColorError");
             if (errorEl) {
                 errorEl.textContent = "Please select a color before adding this product to cart.";

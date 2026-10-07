@@ -383,9 +383,24 @@
                     </div>
 
 
-                    <!-- PRODUCT IMAGE: GALLERY UPLOAD OR REMOTE URL -->
+                    <!-- PRODUCT IMAGE DISPLAY MODE -->
+                    <div class="admin-form-group full admin-image-mode-wrapper" id="adminProductImageModeWrapper">
+                        <label class="admin-image-mode-heading">Product Image Display Mode:</label>
+                        <div class="admin-image-mode-options">
+                            <label class="admin-radio-label">
+                                <input type="radio" name="adminProductImageDisplayMode" value="single" id="adminProductImageModeSingle" checked>
+                                <span>Single Image</span>
+                            </label>
+                            <label class="admin-radio-label">
+                                <input type="radio" name="adminProductImageDisplayMode" value="colorCarousel" id="adminProductImageModeCarousel">
+                                <span>Color-wise Images / Carousel</span>
+                            </label>
+                        </div>
+                    </div>
 
-                    <div class="admin-form-group">
+
+                    <!-- SINGLE PRODUCT IMAGE: GALLERY UPLOAD OR REMOTE URL -->
+                    <div class="admin-form-group" id="adminProductSingleImageSection">
 
                         <label
                             for="adminProductImageFile"
@@ -432,12 +447,12 @@
                     </div>
 
 
-                    <!-- AVAILABLE COLORS (OPTIONAL) -->
-                    <div class="admin-form-group full admin-colors-section" id="adminProductColorsGroup">
+                    <!-- AVAILABLE COLORS / CAROUSEL CONFIGURATION -->
+                    <div class="admin-form-group full admin-colors-section" id="adminProductColorsGroup" style="display: none;">
                         <label class="admin-colors-heading">
-                            Available Colors (Optional)
+                            Available Colors &amp; Color-wise Images
                         </label>
-                        <div class="admin-colors-toggle-wrapper">
+                        <div class="admin-colors-toggle-wrapper" style="display: none;">
                             <label for="adminProductHasColors" class="admin-checkbox-label">
                                 <input type="checkbox" id="adminProductHasColors" class="admin-color-toggle-input">
                                 <span>This product has available colors</span>
@@ -469,20 +484,6 @@
                             <div class="admin-selected-colors-preview" id="adminProductSelectedColorsPreview">
                                 <span class="preview-title">Selected:</span>
                                 <span class="preview-list" id="adminProductSelectedColorsText">None</span>
-                            </div>
-
-                            <div class="admin-image-mode-wrapper" id="adminProductImageModeWrapper">
-                                <label class="admin-image-mode-heading">Product Image Display:</label>
-                                <div class="admin-image-mode-options">
-                                    <label class="admin-radio-label">
-                                        <input type="radio" name="adminProductImageDisplayMode" value="single" id="adminProductImageModeSingle" checked>
-                                        <span>Single Image</span>
-                                    </label>
-                                    <label class="admin-radio-label">
-                                        <input type="radio" name="adminProductImageDisplayMode" value="colorCarousel" id="adminProductImageModeCarousel">
-                                        <span>Color-wise Images / Carousel</span>
-                                    </label>
-                                </div>
                             </div>
 
                             <div class="admin-color-images-section" id="adminProductColorImagesSection" style="display: none;">
@@ -822,9 +823,24 @@
             </div>
 
 
-            <!-- EDIT PRODUCT IMAGE: GALLERY UPLOAD OR REMOTE URL -->
+            <!-- EDIT PRODUCT IMAGE DISPLAY MODE -->
+            <div class="admin-form-group full admin-image-mode-wrapper" id="adminEditProductImageModeWrapper">
+                <label class="admin-image-mode-heading">Product Image Display Mode:</label>
+                <div class="admin-image-mode-options">
+                    <label class="admin-radio-label">
+                        <input type="radio" name="adminEditProductImageDisplayMode" value="single" id="adminEditProductImageModeSingle" checked>
+                        <span>Single Image</span>
+                    </label>
+                    <label class="admin-radio-label">
+                        <input type="radio" name="adminEditProductImageDisplayMode" value="colorCarousel" id="adminEditProductImageModeCarousel">
+                        <span>Color-wise Images / Carousel</span>
+                    </label>
+                </div>
+            </div>
 
-            <div class="admin-form-group">
+
+            <!-- EDIT PRODUCT SINGLE IMAGE: GALLERY UPLOAD OR REMOTE URL -->
+            <div class="admin-form-group full" id="adminEditProductSingleImageSection">
 
                 <label
                     for="adminEditProductImageFile"
@@ -850,29 +866,25 @@
                     placeholder="https://res.cloudinary.com/... or https://..."
                 >
 
-            </div>
-
-
-            <!-- EDIT PRODUCT PREVIEW -->
-
-            <div
-                class="admin-product-preview"
-                id="adminEditProductPreview"
-                hidden
-            >
-
-                <img
-                    id="adminEditProductPreviewImage"
-                    src=""
-                    alt="Edit product preview"
+                <!-- EDIT PRODUCT PREVIEW -->
+                <div
+                    class="admin-product-preview"
+                    id="adminEditProductPreview"
+                    hidden
                 >
+                    <img
+                        id="adminEditProductPreviewImage"
+                        src=""
+                        alt="Edit product preview"
+                    >
+                </div>
 
             </div>
 
 
             <!-- EDIT PRODUCT DESCRIPTION -->
 
-            <div class="admin-form-group">
+            <div class="admin-form-group full">
 
                 <label for="adminEditProductDescription">
                     Description
@@ -886,12 +898,12 @@
             </div>
 
 
-            <!-- EDIT AVAILABLE COLORS (OPTIONAL) -->
-            <div class="admin-form-group full admin-colors-section" id="adminEditProductColorsGroup">
+            <!-- EDIT AVAILABLE COLORS / CAROUSEL CONFIGURATION -->
+            <div class="admin-form-group full admin-colors-section" id="adminEditProductColorsGroup" style="display: none;">
                 <label class="admin-colors-heading">
-                    Available Colors (Optional)
+                    Available Colors &amp; Color-wise Images
                 </label>
-                <div class="admin-colors-toggle-wrapper">
+                <div class="admin-colors-toggle-wrapper" style="display: none;">
                     <label for="adminEditProductHasColors" class="admin-checkbox-label">
                         <input type="checkbox" id="adminEditProductHasColors" class="admin-color-toggle-input">
                         <span>This product has available colors</span>
@@ -923,20 +935,6 @@
                     <div class="admin-selected-colors-preview" id="adminEditProductSelectedColorsPreview">
                         <span class="preview-title">Selected:</span>
                         <span class="preview-list" id="adminEditProductSelectedColorsText">None</span>
-                    </div>
-
-                    <div class="admin-image-mode-wrapper" id="adminEditProductImageModeWrapper">
-                        <label class="admin-image-mode-heading">Product Image Display:</label>
-                        <div class="admin-image-mode-options">
-                            <label class="admin-radio-label">
-                                <input type="radio" name="adminEditProductImageDisplayMode" value="single" id="adminEditProductImageModeSingle" checked>
-                                <span>Single Image</span>
-                            </label>
-                            <label class="admin-radio-label">
-                                <input type="radio" name="adminEditProductImageDisplayMode" value="colorCarousel" id="adminEditProductImageModeCarousel">
-                                <span>Color-wise Images / Carousel</span>
-                            </label>
-                        </div>
                     </div>
 
                     <div class="admin-color-images-section" id="adminEditProductColorImagesSection" style="display: none;">

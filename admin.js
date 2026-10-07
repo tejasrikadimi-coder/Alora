@@ -2894,7 +2894,12 @@ function setImageDisplayMode(type, mode) {
     const prefix = getAdminColorElementPrefix(type);
     const singleRadio = document.getElementById(prefix + "ImageModeSingle");
     const carouselRadio = document.getElementById(prefix + "ImageModeCarousel");
+    const singleSection = document.getElementById(prefix + "SingleImageSection");
+    const colorsGroup = document.getElementById(prefix + "ColorsGroup");
+    const toggleEl = document.getElementById(prefix + "HasColors");
+    const bodyEl = document.getElementById(prefix + "ColorsBody");
     const section = document.getElementById(prefix + "ColorImagesSection");
+    const previewEl = document.getElementById(prefix + "Preview");
 
     const isCarousel = (mode === "colorCarousel");
     if (adminColorsState[type]) {
@@ -2904,8 +2909,32 @@ function setImageDisplayMode(type, mode) {
     if (singleRadio) singleRadio.checked = !isCarousel;
     if (carouselRadio) carouselRadio.checked = isCarousel;
 
+    if (singleSection) {
+        singleSection.style.display = isCarousel ? "none" : "block";
+    }
+
+    if (colorsGroup) {
+        colorsGroup.style.display = isCarousel ? "block" : "none";
+    }
+
+    if (toggleEl) {
+        toggleEl.checked = isCarousel;
+    }
+
+    if (bodyEl) {
+        bodyEl.style.display = isCarousel ? "block" : "none";
+    }
+
     if (section) {
         section.style.display = isCarousel ? "block" : "none";
+    }
+
+    if (previewEl) {
+        if (isCarousel) {
+            previewEl.style.display = "none";
+        } else {
+            previewEl.style.display = "";
+        }
     }
 
     if (isCarousel) {
@@ -3394,20 +3423,53 @@ if (adminProductForm) {
                 return;
             }
 
-            if (selectedFile) {
-                const validation = validateProductImageFile(selectedFile);
-                if (!validation.valid) {
-                    showAdminProductMessage(validation.error, "error");
-                    return;
-                }
-            } else if (manualImage) {
-                // Reject relative or local file paths (such as images/...)
-                if (manualImage.startsWith("images/") || !/^https?:\/\//i.test(manualImage)) {
+            const imageDisplayMode = getImageDisplayMode("add");
+            const availableColors = (imageDisplayMode === "colorCarousel") ? getSelectedProductColors("add") : [];
+            const rawColorImages = (adminColorsState.add && adminColorsState.add.colorImages) || {};
+            const colorImages = {};
+
+            if (imageDisplayMode === "single") {
+                if (selectedFile) {
+                    const validation = validateProductImageFile(selectedFile);
+                    if (!validation.valid) {
+                        showAdminProductMessage(validation.error, "error");
+                        return;
+                    }
+                } else if (manualImage) {
+                    // Reject relative or local file paths (such as images/...)
+                    if (manualImage.startsWith("images/") || !/^https?:\/\//i.test(manualImage)) {
+                        showAdminProductMessage(
+                            "Local file paths (such as 'images/...') cannot be saved. Please select a photo from your device/gallery or provide a valid https:// image URL.",
+                            "error"
+                        );
+                        return;
+                    }
+                } else {
                     showAdminProductMessage(
-                        "Local file paths (such as 'images/...') cannot be saved. Please select a photo from your device/gallery or provide a valid https:// image URL.",
+                        "Please select a product image to upload or provide an image URL.",
                         "error"
                     );
                     return;
+                }
+            } else if (imageDisplayMode === "colorCarousel") {
+                if (availableColors.length === 0) {
+                    showAdminProductMessage(
+                        "Please select at least one available color for Color-wise Images / Carousel mode.",
+                        "error"
+                    );
+                    return;
+                }
+
+                for (const col of availableColors) {
+                    const url = rawColorImages[col] || (Object.keys(rawColorImages).find(k => k.trim().toLowerCase() === col.toLowerCase()) ? rawColorImages[Object.keys(rawColorImages).find(k => k.trim().toLowerCase() === col.toLowerCase())] : "");
+                    if (!url || typeof url !== "string" || !url.trim() || url.trim().startsWith("images/") || !/^https?:\/\//i.test(url.trim())) {
+                        showAdminProductMessage(
+                            `Please provide a valid Cloudinary image URL for color "${col}".`,
+                            "error"
+                        );
+                        return;
+                    }
+                    colorImages[col] = url.trim();
                 }
             }
 
@@ -3422,48 +3484,46 @@ if (adminProductForm) {
             try {
                 let finalImageUrl = "";
 
-                if (selectedFile) {
-                    // Log selected file
-                    console.log("[ALORA PRODUCT UPLOAD DEBUG] selected file:", selectedFile);
+                if (imageDisplayMode === "single") {
+                    if (selectedFile) {
+                        // Log selected file
+                        console.log("[ALORA PRODUCT UPLOAD DEBUG] selected file:", selectedFile);
 
-                    showAdminProductMessage(
-                        "Uploading image to Cloudinary...",
-                        "loading"
-                    );
+                        showAdminProductMessage(
+                            "Uploading image to Cloudinary...",
+                            "loading"
+                        );
 
-                    // Upload selected File object to Cloudinary first using cloudName and uploadPreset
-                    const uploadResult = await uploadProductImageToCloudinary(
-                        selectedFile,
-                        function (statusText) {
-                            if (adminAddProductButton) {
-                                adminAddProductButton.textContent = statusText;
+                        // Upload selected File object to Cloudinary first using cloudName and uploadPreset
+                        const uploadResult = await uploadProductImageToCloudinary(
+                            selectedFile,
+                            function (statusText) {
+                                if (adminAddProductButton) {
+                                    adminAddProductButton.textContent = statusText;
+                                }
                             }
+                        );
+
+                        // Log Cloudinary response
+                        console.log("[ALORA PRODUCT UPLOAD DEBUG] Cloudinary response:", uploadResult);
+
+                        // Read response.secure_url
+                        const secureUrl = uploadResult && (uploadResult.secure_url || uploadResult.url);
+
+                        // Log secure_url
+                        console.log("[ALORA PRODUCT UPLOAD DEBUG] secure_url:", secureUrl);
+
+                        // If upload fails or secure_url is missing, do not create product
+                        if (!secureUrl || typeof secureUrl !== "string" || !/^https?:\/\//i.test(secureUrl)) {
+                            throw new Error("Cloudinary did not return a valid secure URL. Product creation aborted.");
                         }
-                    );
 
-                    // Log Cloudinary response
-                    console.log("[ALORA PRODUCT UPLOAD DEBUG] Cloudinary response:", uploadResult);
-
-                    // Read response.secure_url
-                    const secureUrl = uploadResult && (uploadResult.secure_url || uploadResult.url);
-
-                    // Log secure_url
-                    console.log("[ALORA PRODUCT UPLOAD DEBUG] secure_url:", secureUrl);
-
-                    // If upload fails or secure_url is missing, do not create product
-                    if (!secureUrl || typeof secureUrl !== "string" || !/^https?:\/\//i.test(secureUrl)) {
-                        throw new Error("Cloudinary did not return a valid secure URL. Product creation aborted.");
+                        finalImageUrl = secureUrl;
+                    } else if (manualImage) {
+                        finalImageUrl = manualImage;
                     }
-
-                    // Gallery Cloudinary URL strictly takes priority over manual input
-                    finalImageUrl = secureUrl;
-                } else if (manualImage) {
-                    if (manualImage.startsWith("images/") || !/^https?:\/\//i.test(manualImage)) {
-                        throw new Error("Local file paths (such as 'images/...') cannot be saved. Please select a photo from your device/gallery or provide a valid https:// image URL.");
-                    }
-                    finalImageUrl = manualImage;
-                } else {
-                    throw new Error("No image provided. Please select a photo from your gallery or enter an image URL.");
+                } else if (imageDisplayMode === "colorCarousel") {
+                    finalImageUrl = colorImages[availableColors[0]];
                 }
 
                 // Final strict guard: under NO circumstance can finalImageUrl be a relative path or non-http
@@ -3489,23 +3549,6 @@ if (adminProductForm) {
                 const badgeEl = document.getElementById("adminProductBadge");
                 const categoryVal = catEl ? catEl.value.trim() : "";
                 const badgeVal = badgeEl ? badgeEl.value.trim() : "";
-
-                const availableColors = getSelectedProductColors("add");
-                const imageDisplayMode = availableColors.length > 0 ? getImageDisplayMode("add") : "single";
-                const rawColorImages = (adminColorsState.add && adminColorsState.add.colorImages) || {};
-                const colorImages = {};
-
-                if (availableColors.length > 0 && imageDisplayMode === "colorCarousel") {
-                    for (const [col, url] of Object.entries(rawColorImages)) {
-                        if (url && typeof url === "string" && url.trim()) {
-                            const cleanUrl = url.trim();
-                            if (cleanUrl.startsWith("images/") || !/^https?:\/\//i.test(cleanUrl)) {
-                                throw new Error(`Invalid image URL for color "${col}". Only secure web URLs (https://...) are allowed.`);
-                            }
-                            colorImages[col] = cleanUrl;
-                        }
-                    }
-                }
 
                 const productData = {
                     name: name,
@@ -3534,6 +3577,7 @@ if (adminProductForm) {
 
                 adminProductForm.reset();
                 resetAdminColors("add");
+                setImageDisplayMode("add", "single");
                 currentSelectedProductFile = null;
 
                 if (adminProductPreview) {
@@ -4323,11 +4367,15 @@ function openAdminProductEditor(product) {
 
     adminProductModal.hidden = false;
 
+    const editMode = (product.imageDisplayMode === "colorCarousel" && Array.isArray(product.availableColors) && product.availableColors.length > 0)
+        ? "colorCarousel"
+        : "single";
+
     setAdminColors(
         "edit",
-        Array.isArray(product.availableColors) ? product.availableColors : [],
-        product.imageDisplayMode || "single",
-        (product.colorImages && typeof product.colorImages === "object") ? product.colorImages : {}
+        editMode === "colorCarousel" ? product.availableColors : [],
+        editMode,
+        (editMode === "colorCarousel" && product.colorImages && typeof product.colorImages === "object") ? product.colorImages : {}
     );
 
     document.body.style.overflow =
@@ -4427,19 +4475,46 @@ if (adminEditProductForm) {
                 return;
             }
 
-            if (selectedEditFile) {
-                const validation = validateProductImageFile(selectedEditFile);
-                if (!validation.valid) {
-                    showAdminEditMessage(validation.error, "error");
-                    return;
+            const editImageDisplayMode = getImageDisplayMode("edit");
+            const editAvailableColors = (editImageDisplayMode === "colorCarousel") ? getSelectedProductColors("edit") : [];
+            const rawEditColorImages = (adminColorsState.edit && adminColorsState.edit.colorImages) || {};
+            const editColorImages = {};
+
+            if (editImageDisplayMode === "single") {
+                if (selectedEditFile) {
+                    const validation = validateProductImageFile(selectedEditFile);
+                    if (!validation.valid) {
+                        showAdminEditMessage(validation.error, "error");
+                        return;
+                    }
+                } else if (manualImage) {
+                    if (manualImage.startsWith("images/") || !/^https?:\/\//i.test(manualImage)) {
+                        showAdminEditMessage(
+                            "Local file paths (such as 'images/...') cannot be saved. Please select a photo from your device/gallery or provide a valid https:// image URL.",
+                            "error"
+                        );
+                        return;
+                    }
                 }
-            } else if (manualImage) {
-                if (manualImage.startsWith("images/") || !/^https?:\/\//i.test(manualImage)) {
+            } else if (editImageDisplayMode === "colorCarousel") {
+                if (editAvailableColors.length === 0) {
                     showAdminEditMessage(
-                        "Local file paths (such as 'images/...') cannot be saved. Please select a photo from your device/gallery or provide a valid https:// image URL.",
+                        "Please select at least one available color for Color-wise Images / Carousel mode.",
                         "error"
                     );
                     return;
+                }
+
+                for (const col of editAvailableColors) {
+                    const url = rawEditColorImages[col] || (Object.keys(rawEditColorImages).find(k => k.trim().toLowerCase() === col.toLowerCase()) ? rawEditColorImages[Object.keys(rawEditColorImages).find(k => k.trim().toLowerCase() === col.toLowerCase())] : "");
+                    if (!url || typeof url !== "string" || !url.trim() || url.trim().startsWith("images/") || !/^https?:\/\//i.test(url.trim())) {
+                        showAdminEditMessage(
+                            `Please provide a valid Cloudinary image URL for color "${col}".`,
+                            "error"
+                        );
+                        return;
+                    }
+                    editColorImages[col] = url.trim();
                 }
             }
 
@@ -4452,43 +4527,44 @@ if (adminEditProductForm) {
             try {
                 let finalImageUrl = "";
 
-                if (selectedEditFile) {
-                    console.log("[ALORA PRODUCT EDIT DEBUG] selected file:", selectedEditFile);
+                if (editImageDisplayMode === "single") {
+                    if (selectedEditFile) {
+                        console.log("[ALORA PRODUCT EDIT DEBUG] selected file:", selectedEditFile);
 
-                    showAdminEditMessage(
-                        "Uploading image to Cloudinary...",
-                        "loading"
-                    );
+                        showAdminEditMessage(
+                            "Uploading image to Cloudinary...",
+                            "loading"
+                        );
 
-                    const uploadResult = await uploadProductImageToCloudinary(
-                        selectedEditFile,
-                        function (statusText) {
-                            if (adminSaveProductButton) {
-                                adminSaveProductButton.textContent = statusText;
+                        const uploadResult = await uploadProductImageToCloudinary(
+                            selectedEditFile,
+                            function (statusText) {
+                                if (adminSaveProductButton) {
+                                    adminSaveProductButton.textContent = statusText;
+                                }
                             }
+                        );
+
+                        console.log("[ALORA PRODUCT EDIT DEBUG] Cloudinary response:", uploadResult);
+
+                        const secureUrl = uploadResult && (uploadResult.secure_url || uploadResult.url);
+                        console.log("[ALORA PRODUCT EDIT DEBUG] secure_url:", secureUrl);
+
+                        if (!secureUrl || typeof secureUrl !== "string" || !/^https?:\/\//i.test(secureUrl)) {
+                            throw new Error("Cloudinary did not return a valid secure URL. Product update aborted.");
                         }
-                    );
 
-                    console.log("[ALORA PRODUCT EDIT DEBUG] Cloudinary response:", uploadResult);
-
-                    const secureUrl = uploadResult && (uploadResult.secure_url || uploadResult.url);
-                    console.log("[ALORA PRODUCT EDIT DEBUG] secure_url:", secureUrl);
-
-                    if (!secureUrl || typeof secureUrl !== "string" || !/^https?:\/\//i.test(secureUrl)) {
-                        throw new Error("Cloudinary did not return a valid secure URL. Product update aborted.");
+                        finalImageUrl = secureUrl;
+                        if (adminEditProductImage) {
+                            adminEditProductImage.value = finalImageUrl;
+                        }
+                    } else if (manualImage) {
+                        finalImageUrl = manualImage;
+                    } else {
+                        throw new Error("No image selected for product update.");
                     }
-
-                    finalImageUrl = secureUrl;
-                    if (adminEditProductImage) {
-                        adminEditProductImage.value = finalImageUrl;
-                    }
-                } else if (manualImage) {
-                    if (manualImage.startsWith("images/") || !/^https?:\/\//i.test(manualImage)) {
-                        throw new Error("Local file paths like 'images/...' cannot be saved. Please select a photo from your gallery or provide a valid https:// image URL.");
-                    }
-                    finalImageUrl = manualImage;
-                } else {
-                    throw new Error("No image selected for product update.");
+                } else if (editImageDisplayMode === "colorCarousel") {
+                    finalImageUrl = editColorImages[editAvailableColors[0]];
                 }
 
                 if (!finalImageUrl || !/^https?:\/\//i.test(finalImageUrl) || finalImageUrl.startsWith("images/")) {
@@ -4505,29 +4581,6 @@ if (adminEditProductForm) {
                 const adminEditProductBadge = document.getElementById("adminEditProductBadge");
                 const editCategory = adminEditProductCategory ? adminEditProductCategory.value.trim() : "";
                 const editBadge = adminEditProductBadge ? adminEditProductBadge.value.trim() : "";
-
-                const editAvailableColors = getSelectedProductColors("edit");
-                const editImageDisplayMode = editAvailableColors.length > 0 ? getImageDisplayMode("edit") : "single";
-                const rawEditColorImages = (adminColorsState.edit && adminColorsState.edit.colorImages) || {};
-                const editColorImages = {};
-
-                if (editAvailableColors.length > 0 && editImageDisplayMode === "colorCarousel") {
-                    for (const [col, url] of Object.entries(rawEditColorImages)) {
-                        if (url && typeof url === "string" && url.trim()) {
-                            const cleanUrl = url.trim();
-                            if (cleanUrl.startsWith("images/") || !/^https?:\/\//i.test(cleanUrl)) {
-                                throw new Error(`Invalid image URL for color "${col}". Only secure web URLs (https://...) are allowed.`);
-                            }
-                            editColorImages[col] = cleanUrl;
-                        }
-                    }
-                } else if (editImageDisplayMode === "single") {
-                    for (const [col, url] of Object.entries(rawEditColorImages)) {
-                        if (url && typeof url === "string" && !url.startsWith("images/") && /^https?:\/\//i.test(url)) {
-                            editColorImages[col] = url.trim();
-                        }
-                    }
-                }
 
                 const updatePayload = {
                     name: name,

@@ -349,6 +349,7 @@ const mockColorError = createMockElement("div");
 const mockThumbnailGallery = createMockElement("div");
 
 // Extract helper functions from script.js
+const colorImgFnMatch = scriptJsSource.match(/function getProductColorImage\([\s\S]*?\n\}/);
 const colorBgFnMatch = scriptJsSource.match(/function getAloraColorBackground\([\s\S]*?\n\}/);
 const renderFnMatch = scriptJsSource.match(/function renderProductDetails\(product\)[\s\S]*?\n\}/);
 const selectColorFnMatch = scriptJsSource.match(/function selectProductColor\(colorName, product\)[\s\S]*?\n\}/);
@@ -390,6 +391,7 @@ const customerVmContext = {
 vm.createContext(customerVmContext);
 
 vm.runInContext(`
+    ${colorImgFnMatch ? colorImgFnMatch[0] : ""}
     ${colorBgFnMatch[0]}
     let selectedProductColor = "";
     ${selectColorFnMatch[0]}
@@ -402,7 +404,7 @@ vm.runInContext(`
 
 const { renderProductDetails, selectProductColor, getSelectedColor, setSelectedColor } = customerVmContext.window;
 
-// Test 13: Customer product page renders color chips when availableColors exists.
+// Test 13: Customer product page renders color chips and initial color image when in colorCarousel mode.
 const testProductWithColors = {
     id: "prod-col-1",
     name: "Royal Peacock Earrings",
@@ -410,15 +412,34 @@ const testProductWithColors = {
     stock: 5,
     image: "https://res.cloudinary.com/vgjfpkoh/image/upload/v1/peacock.jpg",
     availableColors: ["Gold", "Silver", "Rose Gold"],
-    imageDisplayMode: "single"
+    imageDisplayMode: "colorCarousel",
+    colorImages: {
+        "Gold": "https://res.cloudinary.com/vgjfpkoh/image/upload/v1/peacock-gold.jpg",
+        "Silver": "https://res.cloudinary.com/vgjfpkoh/image/upload/v1/peacock-silver.jpg",
+        "Rose Gold": "https://res.cloudinary.com/vgjfpkoh/image/upload/v1/peacock-rosegold.jpg"
+    }
 };
 
 renderProductDetails(testProductWithColors);
-assert.equal(mockProductSection.style.display, "block", "Colors section must be visible");
+assert.equal(mockProductSection.style.display, "block", "Colors section must be visible in colorCarousel mode");
 assert.equal(mockChipsContainer.children.length, 3, "Must render exactly 3 color chips");
+assert.equal(mockImg.src, "https://res.cloudinary.com/vgjfpkoh/image/upload/v1/peacock-gold.jpg", "Initial main image must show first color's image");
 console.log("PASS 13: Customer product page renders color chips when availableColors exists.");
 
-// Test 14: Customer product page hides color section when availableColors is empty or missing.
+// Test 14: Customer product page hides color section when in single mode or colors empty/missing.
+const testProductSingleMode = {
+    id: "prod-single-1",
+    name: "Single Mode Choker",
+    price: 799,
+    stock: 4,
+    image: "https://res.cloudinary.com/vgjfpkoh/image/upload/v1/choker.jpg",
+    availableColors: ["Gold", "Silver"],
+    imageDisplayMode: "single"
+};
+renderProductDetails(testProductSingleMode);
+assert.equal(mockProductSection.style.display, "none", "Colors section must be hidden when imageDisplayMode is single");
+assert.equal(mockImg.src, "https://res.cloudinary.com/vgjfpkoh/image/upload/v1/choker.jpg", "Single mode must show product.image");
+
 const testProductNoColors = {
     id: "prod-no-col",
     name: "Simple Hair Pin",
@@ -541,6 +562,7 @@ const cartVmContext = {
 vm.createContext(cartVmContext);
 
 vm.runInContext(`
+    ${colorImgFnMatch[0]}
     ${saveCartFnMatch[0]}
     ${addToCartFnMatch[0]}
     ${addCurrentProductToCartFnMatch[0]}
