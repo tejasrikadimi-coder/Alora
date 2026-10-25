@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Alora Handmade Jewelry</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/alora-favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/alora-favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/alora-favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+
+<body>
+
+
+<header>
+
+    <a href="index.html" class="logo" aria-label="Alora Handmade Jewelry">
+        <img src="assets/alora-logo-transparent.png" alt="Alora Logo" class="logo-mark">
+        <span class="logo-text">Alora</span>
+    </a>
+
+    <a href="index.html" class="header-back">
+        ← Back to Home
+    </a>
+
+</header>
+
+
+<main class="auth-page">
+
+    <div class="auth-card">
+
+        <!-- 1. CUSTOMER LOGIN -->
+        <section
+            class="auth-form-section"
+            id="loginSection">
+
+            <div class="auth-brand-badge">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Monogram" class="auth-logo-monogram">
+            </div>
+
+            <div class="auth-heading">
+                <p>WELCOME BACK</p>
+                <h1>Login</h1>
+                <span>Sign in with your Google account to view your profile and orders.</span>
+            </div>
+
+            <p
+                class="auth-message"
+                id="loginMessage"
+                role="status"
+                aria-live="polite">
+            </p>
+
+            <button
+                type="button"
+                id="googleLoginBtn"
+                class="google-auth-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.97 0 12s.45 3.83 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                <span>Sign in with Google</span>
+            </button>
+
+            <p class="auth-switch">
+                Don't have an account?
+                <button
+                    type="button"
+                    onclick="showRegister()">
+                    Sign Up
+                </button>
+            </p>
+
+        </section>
+
+        <!-- 2. CUSTOMER SIGN UP -->
+        <section
+            class="auth-form-section"
+            id="registerSection"
+            hidden>
+
+            <div class="auth-brand-badge">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Monogram" class="auth-logo-monogram">
+            </div>
+
+            <div class="auth-heading">
+                <p>JOIN ALORA</p>
+                <h1>Create Account</h1>
+                <span>Create your account with Google to manage your profile and orders.</span>
+            </div>
+
+            <p
+                class="auth-message"
+                id="registerMessage"
+                role="status"
+                aria-live="polite">
+            </p>
+
+            <button
+                type="button"
+                id="googleRegisterBtn"
+                class="google-auth-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.14z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.97 0 12s.45 3.83 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                <span>Sign up with Google</span>
+            </button>
+
+            <div class="auth-consent-group">
+                <label for="registerTermsConsent" class="auth-consent-label">
+                    <input
+                        type="checkbox"
+                        id="registerTermsConsent"
+                        name="registerTermsConsent"
+                        class="auth-consent-checkbox">
+                    <span class="auth-consent-text">
+                        I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Terms &amp; Conditions</a> and <a href="privacy-policy.html" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Privacy Policy</a>.
+                    </span>
+                </label>
+            </div>
+
+            <div class="auth-privacy-notice">
+                <span>🔒 Secure Google Sign-Up. Fast and passwordless.</span>
+            </div>
+
+            <p class="auth-switch">
+                Already have an account?
+                <button
+                    type="button"
+                    onclick="showLogin()">
+                    Login
+                </button>
+            </p>
+        </section>
+
+        <!-- 4. STORE ADMINISTRATOR LOGIN (EMAIL + PASSWORD) -->
+        <section
+            class="auth-form-section"
+            id="adminLoginSection"
+            hidden>
+
+            <div class="auth-brand-badge">
+                <img src="assets/alora-logo-transparent.png" alt="Alora Monogram" class="auth-logo-monogram">
+            </div>
+
+            <div class="auth-heading">
+                <p>ALORA MANAGEMENT</p>
+                <h1>Admin Portal</h1>
+                <span>Authorized store administrator access only.</span>
+            </div>
+
+            <form id="adminLoginForm" novalidate>
+                <label for="adminLoginEmail">Admin Email</label>
+                <input
+                    type="email"
+                    id="adminLoginEmail"
+                    value="alorajewels26@gmail.com"
+                    placeholder="alorajewels26@gmail.com"
+                    autocomplete="email"
+                    required>
+
+                <label for="adminLoginPassword">Admin Password</label>
+                <div class="password-field">
+                    <input
+                        type="password"
+                        id="adminLoginPassword"
+                        placeholder="Enter admin password"
+                        autocomplete="current-password"
+                        required>
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        aria-label="Show password"
+                        onclick="togglePassword('adminLoginPassword', this)">
+                    </button>
+                </div>
+
+                <p
+                    class="auth-message"
+                    id="adminLoginMessage"
+                    role="status"
+                    aria-live="polite">
+                </p>
+
+                <button
+                    type="submit"
+                    class="auth-submit"
+                    id="adminLoginSubmitBtn">
+                    Login to Dashboard
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                <button
+                    type="button"
+                    onclick="showLogin()">
+                    ← Back to Customer Login
+                </button>
+            </p>
+        </section>
+
+    </div>
+
+</main>
+
+<script src="script.js"></script>
+
+<script
+    type="module"
+    src="auth.js">
+</script>
+
+</body>
+
+</html>
